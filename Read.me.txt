@@ -1,0 +1,1 @@
+This is an angular 2 application;
