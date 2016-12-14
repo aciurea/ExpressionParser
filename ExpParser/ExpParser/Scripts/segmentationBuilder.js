@@ -1,229 +1,234 @@
 ﻿$(document).ready(function () {
-    $('#builder-basic').queryBuilder(options);
-
+    setFilters();
     $('#btnReset').on('click', function () {
-        console.log("Click reset");
+        $('#txtParseResult').val('');
         $('#builder-basic').queryBuilder('reset');
     });
 
     $('#btnParse').on('click', function () {
-        console.log("Click parse");
-        var expressionData = $('#builder-basic').queryBuilder('getRules');
-        console.log(expressionData);
-
-        //var json = JSON.stringify(query, undefined, 2);
-        //console.log(json);
-
-        var parsedExpression = parseData(expressionData, isSimple = true, isNextGroup = false);
-
-        if (parsedExpression && parsedExpression.indexOf('null') > -1) {
-            parsedExpression = null;
-        }
-        console.log(parsedExpression);
-
+        const expressionData = $('#builder-basic').queryBuilder('getRules');
+        if ($.isEmptyObject(expressionData)) return;
+        var parsedExpression = parseData(expressionData);
         $('#txtExpression').val(parsedExpression);
     });
-
-    $('#btnLoadJS').on('click', function () {
-        var expression = $('#txtParseResult').val();
-        console.log("(JS)Click load expression: " + expression);
-        loadExpression(expression);
+    $('#btnOldImpl').click(function () {
+        $("#oldContent").toggleClass("tglOldImpl");
+        $('i.glyphicon').toggleClass("glyphicon-menu-up").toggleClass("glyphicon-menu-down");
     });
 
-    expressionParserPlugin();
+    $('#btnLoadExpression').on('click', function () {
+        const expression = $('#txtParseResult').val();
+        loadExpressionFromServer(expression);
+    });
+
 });
+function setFilters() {
+    $.getJSON("filters.json", function (data) {
+        options.filters = data;
+        const sessionParams = loadSessionParameters();
 
-
-function expressionToObjects() {
-    $("#btnLoad").on('click', function () {
-        var data = $('#txtParseResult').val();
-        var json = JSON.parse(data);
-
-        var result = buildDataFromExpression(data);
-
-        console.log(result);
-
-        if (result) {
-            $('#builder-basic').queryBuilder('setRules', data);
-        } else {
-            $('#builder-basic').queryBuilder('reset');
+        if (sessionParams) {
+            sessionParams.forEach(function (val) {
+                options.filters.push({ id: "@" + val, label: val, type: "boolean", size: 30 });
+            });
         }
+        $('#builder-basic').queryBuilder(options);
     });
 }
-
-var options = {
+const options = {
     allow_empty: false,
     plugins: {
         "not-group": null
     },
-
-    filters: [
-        { id: '@Lang', label: 'Lang', type: 'string', size: 30 },
-        { id: '@anid', label: 'anid', type: 'string', size: 30 },
-        { id: '@V7', label: 'V7', type: 'string', size: 30 },
-        { id: '@sr', label: 'sr', type: 'string', size: 30 },
-        { id: '@vip', label: 'vip', type: 'string', size: 30 },
-        { id: '@cip', label: 'cip', type: 'string', size: 30 },
-        { id: '@real', label: 'real', type: 'string', size: 30 },
-        { id: '@flag', label: 'flag', type: 'string', size: 30 },
-        { id: '@Domain', label: 'Domain', type: 'string', size: 30 },
-        { id: '@IC', label: 'IC', type: 'string', size: 30 },
-        { id: '@MKW', label: 'MKW', type: 'string', size: 30 },
-        { id: '@RefType', label: 'RefType', type: 'string', size: 30 },
-        { id: '@SearchLang', label: 'SearchLang', type: 'string', size: 30 },
-        { id: '@SearchTerm', label: 'SearchTerm', type: 'string', size: 30 },
-        { id: '@Country', label: 'Country', type: 'string', size: 30 },
-        { id: '@isWin', label: 'isWin', type: 'string', size: 30 },
-        { id: '@version', label: 'version', type: 'string', size: 30 },
-        { id: '@currency', label: 'currency', type: 'string', size: 30 },
-        { id: '@gpr', label: 'gpr', type: 'string', size: 30 }
-    ],
-
+    filters: [],
     operators: [
-        { type: 'exists', nb_inputs: 0, apply_to: ['string', 'number', 'datetime', 'boolean'] },
+        { type: 'exists', nb_inputs: 0, apply_to: ['string', 'integer', 'datetime', 'boolean'] },
         { type: 'equal' },
-        //{ type: 'equal_ignore_case', nb_inputs: 1, apply_to: ['string', 'datetime', 'boolean'] },
+        { type: 'equal_ignore_case', nb_inputs: 1, apply_to: ['string', 'datetime', 'boolean'] },
         { type: 'not_equal' },
         { type: 'less' },
-        { type: 'less_or_equal', apply_to: ['string', 'number', 'datetime', 'boolean'] },
-        { type: 'greater', apply_to: ['string', 'number', 'datetime', 'boolean'] },
-        { type: 'greater_or_equal', apply_to: ['string', 'number', 'datetime', 'boolean'] },
-        { type: 'contains', apply_to: ['string', 'number', 'datetime', 'boolean'] },
-        //{ type: 'contains_ignore_case', nb_inputs: 1, apply_to: ['string', 'datetime', 'boolean'] },
-        //{ type: 'regex_match', nb_inputs: 1, apply_to: ['string', 'number', 'datetime', 'boolean'] }
+        { type: 'less_or_equal' },
+        { type: 'greater' },
+        { type: 'greater_or_equal' },
+        { type: 'contains' },
+        { type: 'contains_ignore_case', nb_inputs: 1, apply_to: ['string', 'datetime', 'boolean'] },
+        { type: 'regex_match', nb_inputs: 1, apply_to: ['string', 'number', 'datetime', 'boolean'] }
     ],
-
 
     conditions: ['AND', 'OR'],
     default_condition: 'AND'
 };
-
-function loadExpression(expression) {
-    //if (!expression) {
-    //    expression = $('#txtExpression').val();
-    //}
-    console.log("loadExpression: " + expression);
-
-    var data = JSON.parse(expression);
-
-    $('#builder-basic').queryBuilder('setRules', data);
-
+function loadSessionParameters() {
+    const parameters = $("#sessionParameters").val();
+    return parameters !== undefined ? JSON.parse(parameters) : null;
+}
+function AddValues(data) {
+    return {
+        field: data.field,
+        id: data.id,
+        input: data.input,
+        operator: data.operator,
+        type: data.type,
+        value: data.value
+    }
 }
 
-function buildDataFromExpression(expression) {
-    var result = {
-        condition: "AND",
-        rules: [
-            {
-                field: "@Domain",
-                id: "@Domain",
-                input: "text",
-                operator: "not_equal",
-                type: "string",
-                value: "A"
-            },
-            {
-                field: "@Domain",
-                id: "@Domain",
-                input: "text",
-                operator: "not_equal",
-                type: "string",
-                value: "B"
-            },
-            {
-                contition: "OR",
-                rules: [
-                 {
-                     field: "@Domain",
-                     id: "@Domain",
-                     input: "text",
-                     operator: "not_equal",
-                     type: "string",
-                     value: "C"
-                 }]
-            }
-        ]
-    };
-
-    if (validateExpression(expression)) {
-        console.log("Parsing...");
-        return result;
-    }
-
-    return null;
+function BeautifyLeft(data, index, result) {
+    const rules = AddValues(data);
+    return result.rules.push(rules);
 }
-
-function areMoreThanTwoRulesPerGroup(data, isNextGroup) {
-    let numberOfRules = 0;
-    if (isNextGroup) numberOfRules = 0;
-    for (let i = 0; i < data.rules.length; i++) {
-        if (!data.rules[i].condition) {
-            numberOfRules++;
-        }
-    }
-    if (numberOfRules > 2) return true;
-    return false;
+function BeautifyRight(data, index, result) {
+    const rules = [];
+    const prevRest = BeautifyExpression(data);
+    rules.push(result);
+    rules.push(prevRest);
+    return result = { data: data.condition, not: data.not, rules: rules };
 }
-
-function parseData(data, isSimple, isNextGroup) {
-    if (!validateData(data)) {
-        return null;
-    }
-
-    let stop = areMoreThanTwoRulesPerGroup(data, isNextGroup);
-    if (stop) {
-        $('#errorOnParsing').css('display', ' block');
-        return null;
+function createJson(data, result) {
+    if (data.rules && data.rules[0].condition) {
+        const prevRes = BeautifyExpression(data.rules[0]);
+        return result === undefined ? prevRes : result;
     } else {
-        $('#errorOnParsing').css('display', ' none');
+        const rules = [];
+        const isSimpleGroup = data.rules[0] && data.rules[1] && !data.rules[1].condition;
+
+        rules.push(AddValues(data.rules[0]));
+        result = isSimpleGroup ? { condition: data.condition, not: data.not, rules: rules } : result.rules.push(rules);
     }
-
-    let result;
-    if (data.rules[0].condition) {
-
-        result = "(" + parseData(data.rules[0]) + ")";
-    } else {
-        if (data.not && isSimple) {
-            result = "NOT" + " " + parseRule(data.rules[0]);
-            isSimple = false;
-        } else {
-            result = parseRule(data.rules[0]);
-        }
-    }
-
+    return result;
+}
+function BeautifyExpression(data, result) {
+    result = createJson(data, result);
     if (data.rules.length > 1) {
         for (let i = 1; i < data.rules.length; i++) {
             if (data.rules[i].condition) {
-                isNextGroup = true;
-                result = "(" + result + ")";
-                if (data.rules[i].not) {
-                    result += " " + data.condition + " " + "NOT" + " (" + parseData(data.rules[i], false, isNextGroup) + ")";
-                } else {
-                    result += " " + data.condition + " (" + parseData(data.rules[i], false, isNextGroup) + ")";
-                }
+                result = BeautifyRight(data.rules[i], i, result);
             } else {
-                result += " " + data.condition + " " + parseRule(data.rules[i]);
+                result = BeautifyLeft(data.rules[i], i, result);
             }
         }
     }
+    return result;
 
+}
+function loadExpressionFromServer(expression) {
+    if (!expression) {
+        expression = $('#txtParseResult').val();
+    }
+    const data = JSON.parse(expression);
+    //const result = BeautifyExpression(data);
+    if (data) {
+        getData(data);
+        $('#builder-basic').queryBuilder('setRules', data);
+    } else {
+        $('#builder-basic').queryBuilder('reset');
+    }
+}
+
+function getData(data) {
+    if (data.rules && data.rules[0].condition) {
+        getData(data.rules[0]);
+    }
+    if (data.rules && data.rules[0].condition && data.rules[1]) {
+        getData(data.rules[1]);
+    }
+    else if (data.rules) { checkParameters(data.rules[0]); }
+    else { checkParameters(data); }
+    if (data.rules && data.rules.length > 1 && !data.rules[0].condition) {
+        for (let i = 0; i < data.rules.length; i++) {
+            if (data.rules[i].condition) {
+                getData(data.rules[i]);
+            } else {
+                checkParameters(data.rules[i]);
+            }
+        }
+    }
+}
+function checkParameters(data) {
+    const isParameter = options.filters.some(function (val) { return val.id === data.id });
+    if (!isParameter) {
+        options.filters.push({ id: data.id, label: data.field, type: data.type, size: 30 });
+        $('#builder-basic').queryBuilder('destroy');
+        $('#builder-basic').queryBuilder(options);
+    }
+}
+
+function parseLeft(data, result, condition, index, not) {
+    if (not) {
+        if ((data.operator === "less" || data.operator === "greater" || data.operator === "greater_or_equal" || data.operator === "less_or_equal")) {
+            result = "(" + result + ")";
+        }
+        result = result.slice(0, -1);
+        result += " " + condition + " " + parseRule(data) + ")";
+        return result;
+    }
+    return result + " " + condition + " " + parseRule(data);
+}
+function parseRight(data, result, index, condition, not) {
+    var prevRes = parseData(data);
+    if (not) {
+        result = result.slice(0, -1);
+        if (data.not || data.rules.length === 1) return result + " " + condition + " " + prevRes + ")";
+
+        return result + " " + condition + " (" + prevRes + "))";
+    }
+    if (data.not || data.rules.length === 1) {
+        return result + " " + condition + " " + prevRes;
+    }
+    prevRes = " " + condition + " (" + prevRes + ")";
+    return result + prevRes;
+}
+function createExpression(data) {
+    if (data.rules && data.rules[0].condition) {
+        if (data.not) {
+            return "NOT (" + parseData(data.rules[0]) + ")";
+        }
+
+        var result = "(" + parseData(data.rules[0]) + ")";
+        if (result.indexOf("(NOT") === 0 || result.indexOf("((") === 0) result = result.slice(1, -1);
+        return result;
+    }
+    if (data.not) {
+        return "NOT " + parseRule(data.rules[0], data.not, data.rules.length);
+    }
+    return parseRule(data.rules[0], data.not);
+}
+function parseData(data) {
+    let result;
+    result = createExpression(data);
+    if (data.rules && data.rules.length > 1) {
+        for (let i = 1; i < data.rules.length; i++) {
+            if (data.rules[i].condition) {
+                result = parseRight(data.rules[i], result, i, data.condition, data.not);
+            } else {
+                result = parseLeft(data.rules[i], result, data.condition, i, data.not);
+            }
+        }
+    }
     return result;
 }
 
-function parseRule(rule) {
-    var result = "";
-    var operator = getOperatorSymbol(rule.operator);
+function parseRule(rule, not, length) {
+    var result;
+    const operator = getOperatorSymbol(rule.operator);
     if (operator) {
         if (operator.isBasic) {
-            result = rule.id + operator.text + "\"" + rule.value + "\"";
-        } else {
-            result = operator.text + "(" + rule.id + ")";
+            if (rule.type === "integer" && (rule.operator === "less" || rule.operator === "greater" || rule.operator === "greater_or_equal" || rule.operator === "less_or_equal")) {
+                return "(" + rule.id + operator.text + rule.value + ')';
+            }
+            result = "(" + rule.id + operator.text + '"' + rule.value + '")';
+            if (not) {
+                if (length === 1) { return result; }
+                return "(" + result + ')';
+            }
+            return result;
         }
-    } else {
-        console.log("Error on parsing rule: " + rule);
+        if (not) {
+            return "(" + operator.text + "(" + rule.id + "))";
+        }
+        return operator.text + "(" + rule.id + ")";
     }
-
-    return "(" + result + ")";
+    return "";
 }
 
 function getOperatorSymbol(operator) {
@@ -267,108 +272,4 @@ function getOperator(operatorSymbol) {
     }
 
     return null;
-}
-
-function validateData(data) {
-    return data.rules && data.rules.length > 0;
-}
-
-function validateExpression(expression) {
-    if (!validateParanthesesNumber(expression)) {
-        console.log("Wrong number of parantheses");
-        return false;
-    }
-
-    if (!validateParanthesesOpenClose(expression)) {
-        console.log("Wrong open/close parantheses");
-        return false;
-    }
-
-    var tokens = getTokens(expression);
-
-    return true;
-}
-
-function getTokens(expression) {
-    var delimiterData = getDelimitersData(expression);
-
-    if (delimiterData.length > 0) {
-
-        var result = [];
-        var token = expression.substring(0, delimiterData[0].position).trim();
-        if (token) {
-            result.push(token);
-        }
-        result.push(delimiterData[0].delimiter);
-
-        var startPosition;
-        var index;
-        for (index = 1; index < delimiterData.length; index++) {
-            startPosition = delimiterData[index - 1].position + delimiterData[index - 1].delimiter.length;
-            token = expression.substring(startPosition, delimiterData[index].position).trim();
-            if (token) {
-                result.push(token);
-            }
-            result.push(delimiterData[index].delimiter);
-        }
-
-        index = delimiterData.length - 1;
-        startPosition = delimiterData[index].position + delimiterData[index].delimiter.length;
-        token = expression.substring(startPosition).trim();
-        if (token) {
-            result.push(token);
-        }
-
-        console.log(result);
-        return result;
-    }
-}
-
-var delimiters = ["(", ")", "and", "or", "AND", "OR", "not", "NOT"];
-function getDelimitersData(expression) {
-    var result = [];
-    for (var i = 0; i < delimiters.length; i++) {
-        var tempExpression = expression;
-        var index;
-        while (tempExpression.indexOf(delimiters[i]) >= 0) {
-            index = tempExpression.indexOf(delimiters[i]);
-            var delimiterData = { delimiter: delimiters[i], position: index };
-            result.push(delimiterData);
-            tempExpression = tempExpression.substring(index + delimiters[i].length);
-        }
-    }
-
-    if (result.length > 0) {
-        result.sort(
-            function (a, b) {
-                return a.position - b.position;
-            });
-    }
-
-    console.log(result);
-    return result;
-}
-
-function validateParanthesesNumber(expression) {
-    var nrOpenParanthesis = (expression.split('(').length - 1);
-    var nrCloseParanthesis = (expression.split(')').length - 1);
-    return nrOpenParanthesis === nrCloseParanthesis;
-}
-
-function validateParanthesesOpenClose(expression) {
-    var countParanthesis = 0;
-    for (var i = 0; i < expression.length; i++) {
-        if (expression[i] === "(") {
-            countParanthesis++;
-        }
-        else if (expression[i] === ")") {
-            countParanthesis--;
-        }
-
-        if (countParanthesis < 0) {
-            return false;
-        }
-    }
-
-    return countParanthesis === 0;
 }

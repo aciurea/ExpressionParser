@@ -66,9 +66,12 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\query-builder.min.css" />
     <Content Include="packages.config" />
+    <Content Include="Scripts\expressionParser.js" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
     <Content Include="Scripts\jquery-2.2.4.min.map" />
+    <Content Include="filters.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -108,10 +111,10 @@
     <Content Include="Scripts\jquery-2.2.4.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\query-builder.standalone.min.js" />
-    <Content Include="Scripts\query-builder.standalone.min.Old.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\segmentationBuilder.js" />
+    <Content Include="Scripts\segmentationBuilder.old.js" />
     <Content Include="Scripts\WebForms\DetailsView.js" />
     <Content Include="Scripts\WebForms\Focus.js" />
     <Content Include="Scripts\WebForms\GridView.js" />
