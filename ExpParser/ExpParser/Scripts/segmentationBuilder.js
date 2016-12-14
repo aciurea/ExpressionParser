@@ -11,16 +11,11 @@
         var parsedExpression = parseData(expressionData);
         $('#txtExpression').val(parsedExpression);
     });
-    $('#btnOldImpl').click(function () {
-        $("#oldContent").toggleClass("tglOldImpl");
-        $('i.glyphicon').toggleClass("glyphicon-menu-up").toggleClass("glyphicon-menu-down");
-    });
-
     $('#btnLoadExpression').on('click', function () {
         const expression = $('#txtParseResult').val();
         loadExpressionFromServer(expression);
     });
-
+    
 });
 function setFilters() {
     $.getJSON("filters.json", function (data) {
