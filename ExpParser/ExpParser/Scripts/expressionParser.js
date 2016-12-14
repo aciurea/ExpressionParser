@@ -63,50 +63,74 @@
     }
 
     function buildObjectWhenMultipleExpression(data, result) {
-        var comparatorIndex = 0;
-        while (comparatorIndex <= data.length) {
-            var operator = getOperatorIndex(data);
-            comparatorIndex = operator.index;
-            if (data.length > 2 && comparatorIndex === -1) {
-                comparatorIndex = data.length;
-            }
-            var expression = data.substring(0, comparatorIndex - 1);
-            data = data.substring(comparatorIndex - 1, data.length).trim();
-            data = data.replace(operator.op, "").trim();
-            var rules = buildObject(expression);
-            if (!result) {
-                result = { condition: operator.op, not: false, rules: [] };
-            }
-            result.rules.push(rules);
-            operator = getOperatorIndex(data);
-            comparatorIndex = operator.index;
-            if (data.length > 2 && comparatorIndex === -1) {
-                comparatorIndex = data.length;
-            }
-            if (comparatorIndex === -1) {
-                comparatorIndex = data.length + 1;
-            }
-        }
-        return result;
+        result = getCouples(data);
+        //var comparatorIndex = 0;
+        //while (comparatorIndex <= data.length) {
+        //    var operator = getOperatorIndex(data);
+        //    comparatorIndex = operator.index;
+        //    if (data.length > 2 && comparatorIndex === -1) {
+        //        comparatorIndex = data.length;
+        //    }
+        //    var expression = data.substring(0, comparatorIndex - 1);
+        //    data = data.substring(comparatorIndex - 1, data.length).trim();
+        //    data = data.replace(operator.op, "").trim();
+        //    var rules = buildObject(expression);
+        //    if (!result) {
+        //        result = { condition: operator.op, not: false, rules: [] };
+        //    }
+        //    result.rules.push(rules);
+        //    operator = getOperatorIndex(data);
+        //    comparatorIndex = operator.index;
+        //    if (data.length > 2 && comparatorIndex === -1) {
+        //        comparatorIndex = data.length;
+        //    }
+        //    if (comparatorIndex === -1) {
+        //        comparatorIndex = data.length + 1;
+        //    }
+        //}
+        //return result;
     }
-    function getCouple(data) {
-        var openIndex = 0;
-        var closeIndex = 0;
-        for (var c of data) {
-            if (c === "(") {
-                openIndex++;
-            }
-            else if (c === ")") {
-                closeIndex++;
-            }
-        }
-    }
-
 
     function isSimpleCompareCondition(data) {
         if (data.indexOf('AND') === -1 && data.indexOf('OR') === -1) {
             return true;
         };
         return false;
+    }
+    function getCouples(condition) {
+        condition = condition.trim();
+
+        var indexOfCharInCondition = -1;
+        var indexOfLastOpenP = 0;
+        var dicPCouplesSource = [];
+        var couplesIndex = -1;
+        var coupleToCloseFounded = false;
+
+
+        for (var c of condition) {
+
+            indexOfCharInCondition++;
+            if (c === '(') {
+                indexOfLastOpenP++;
+                dicPCouplesSource.push({ OpenPIndex: indexOfCharInCondition, ClosePIndex: -1 });
+            }
+            else if (c === ')') {
+                couplesIndex = dicPCouplesSource.length;
+                coupleToCloseFounded = false;
+                while (couplesIndex > 0) {
+                    if (dicPCouplesSource[couplesIndex - 1].ClosePIndex == -1) {
+                        dicPCouplesSource[couplesIndex - 1].ClosePIndex = indexOfCharInCondition;
+                        coupleToCloseFounded = true;
+                        break;
+                    }
+                    couplesIndex--;
+                }
+                if (coupleToCloseFounded == false) {
+                    return "error";
+                }
+            }
+        }
+        return dicPCouplesSource;
+
     }
 });
