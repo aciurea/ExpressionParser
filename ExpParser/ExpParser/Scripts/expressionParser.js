@@ -1,29 +1,44 @@
-﻿$(document).ready(function () {
+﻿"use strict";
+$(document).ready(function () {
     $("#btnExpressionParser").on("click", function () {
-        var data = '(@domain=$%"sdgfd") AND (@domain=$%"sdgfd") AND (@domain=$%"sdgfd")';
+        const data = $("#txtExpression").val();
         debugger;
-        var result = parseExpression(data);
+        const result = parseExpression(data);
+        $('#builder-basic').queryBuilder('setRules', result);
     });
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
     function getCompareSign(data) {
         var res = {};
+
         operators.some(function (op) {
-            var currentOpIndex = data.indexOf(op);
+            const currentOpIndex = data.indexOf(op);
             return currentOpIndex !== -1 ? res = { operator: op, index: currentOpIndex } : res = "";
         });
         return res;
     }
 
     function buildObject(data) {
-        var res = getCompareSign(data);
+        data.trim();
+        const res = getCompareSign(data);
         if (res === "") {
-            return;
+            if (data.indexOf('Exists') === 0) {
+                const value = data.substring(data.indexOf('(') + 1);
+                return {
+                    operator: "exists",
+                    field: value,
+                    id: value,
+                    input: "text",
+                    type: "string",
+                    value: null
+                }
+            }
         }
-        var parameter = data.substring(1, res.index).trim();
-        var valueIndex = res.index + res.operator.length + 1;
-        var valueToCompareTo = data.substring(valueIndex, data.length - 1);
-        var result = {
-            operator: res.operator,
+        const parameter = data.substring(1, res.index).trim();
+        const valueIndex = res.index + res.operator.length + 1;
+        const valueToCompareTo = data.substring(valueIndex, data.length - 1);
+        const op = getOperator(res.operator);
+        const result = {
+            operator: op.text,
             field: parameter.toLowerCase(),
             id: parameter.toLowerCase(),
             input: "text",
@@ -34,21 +49,19 @@
     }
 
     function parseExpression(data) {
-        var result = analyzeCondition(data);
+        const result = analyzeCondition(data);
         return result;
     }
 
-    function analyzeCondition(data, result) {
-        if (isSimpleCompareCondition(data)) {
-            var rules = buildObject(data);
+    function analyzeCondition(expression, result) {
+        if (isSimpleCompareCondition(expression)) {
+            const rules = buildObject(expression);
             result = { condition: "AND", not: false, rules: [] };
             result.rules.push(rules);
             return result;
         }
-        if (data.startsWith('(')) {
-            result = buildObjectWhenMultipleExpression(data);
 
-        }
+        result = buildObjectWhenMultipleExpression(expression);
 
         return result;
     }
@@ -56,41 +69,145 @@
         var index = data.indexOf("AND");
         var operator = "AND";
         if (index === -1) {
-            index = data.indexOf("OR");
+            index = data.indexOf("OR") + 2;
             operator = "OR";
+            index += 2;
+        } else {
+            index += 3;
         }
+
         return { index: index, op: operator };
     }
-
-    function buildObjectWhenMultipleExpression(data, result) {
-        result = getCouples(data);
-        //var comparatorIndex = 0;
-        //while (comparatorIndex <= data.length) {
-        //    var operator = getOperatorIndex(data);
-        //    comparatorIndex = operator.index;
-        //    if (data.length > 2 && comparatorIndex === -1) {
-        //        comparatorIndex = data.length;
-        //    }
-        //    var expression = data.substring(0, comparatorIndex - 1);
-        //    data = data.substring(comparatorIndex - 1, data.length).trim();
-        //    data = data.replace(operator.op, "").trim();
-        //    var rules = buildObject(expression);
-        //    if (!result) {
-        //        result = { condition: operator.op, not: false, rules: [] };
-        //    }
-        //    result.rules.push(rules);
-        //    operator = getOperatorIndex(data);
-        //    comparatorIndex = operator.index;
-        //    if (data.length > 2 && comparatorIndex === -1) {
-        //        comparatorIndex = data.length;
-        //    }
-        //    if (comparatorIndex === -1) {
-        //        comparatorIndex = data.length + 1;
-        //    }
-        //}
-        //return result;
+    function detectCouple(expression, couple) {
+        var partCond = expression.substring(couple.OpenPIndex, couple.ClosePIndex);
+        if ((partCond.indexOf("AND") !== -1) || partCond.indexOf("OR") !== -1) {
+            return true;
+        }
+        return false;
     }
 
+    function getLastIndexCouple(couples, parentCouple) {
+        var counter = 0;
+        for (var c of couples) {
+            if (c.OpenPIndex > parentCouple.ClosePIndex) {
+                counter++;
+            }
+        }
+        return counter;
+    }
+    function getCouplesFromGroup(couples, expression) {
+        debugger;
+        let defaultCouple = couples.shift(); const insideCouples = []; let isGroup = false; let c = {}; const insideRules = []; let isFirstTime = true; let counter = 0;
+        let lastIndexOfGroup = 0;
+        couples.forEach(function (couple) {
+            if (couple.OpenPIndex < lastIndexOfGroup) { return; }
+            //couple with couples
+            if (defaultCouple.ClosePIndex > couple.OpenPIndex) {
+                const isCoupleInside = detectCouple(expression, couple);
+                if (isCoupleInside) {
+                    //need to do it recursively
+                    const index = getLastIndexCouple(couples, couple);
+                    const data = couples.slice(counter, couples.length - index);
+                    const result = getCouplesFromGroup(data, expression);
+                    console.log(result);
+                    insideRules.push(result);
+                    lastIndexOfGroup = result[result.length - 1].rules[result[result.length - 1].rules.length - 1].ClosePIndex;
+                    defaultCouple = couple;
+                    return;
+                }
+                counter++;
+                isGroup = true;
+                c = { OpenPIndex: couple.OpenPIndex, ClosePIndex: couple.ClosePIndex };
+                insideRules.push(c);
+                isFirstTime = false;
+
+            } else {
+                counter++;
+                if (isGroup) {
+                    var prevRes = { isGroup: true, rules: insideRules.slice() };
+                    insideCouples.push(prevRes);
+                    insideRules.length = 0;
+                };
+                if (couples[counter]) {
+                    if (couple.ClosePIndex > couples[counter].ClosePIndex) { defaultCouple = couple; return; }
+                }
+                c = { OpenPIndex: couple.OpenPIndex, ClosePIndex: couple.ClosePIndex };
+                if (couples.length === 1 || isFirstTime) {
+                    insideCouples.push(defaultCouple, c);
+                    isFirstTime = false;
+                }
+                else { insideCouples.push(c) }
+                isGroup = false;
+            }
+        });
+        if (isGroup) {
+            var prevRes = { isGroup: true, rules: insideRules };
+            insideCouples.push(prevRes);
+        };
+        console.log("Exit from group", insideCouples);
+        return insideCouples;
+    }
+
+    function buildObjectWhenMultipleExpression(expression, result) {
+        const couples = getCouples(expression);
+        const insideCouples = getCouplesFromGroup(couples, expression);
+
+        insideCouples.forEach(function (couple) {
+            //is group
+            if (couple.isGroup) {
+
+            }
+                //are rules
+            else {
+
+            }
+        });
+
+        debugger;
+        var groupIndex = 0;
+        var operator = { index: 0 };
+        insideCouples.forEach(function (couple) {
+            const partExpresssion = expression.substring(couple.OpenPIndex, couple.ClosePIndex).trim();
+            if (isSimpleCompareCondition(partExpresssion)) {
+                if (partExpresssion.startsWith('(')) {
+                    //no Exists operator here
+                    operator = getOperatorIndex(expression);
+                    if (result === undefined) {
+                        result = { condition: operator.op, rules: [] }
+                    }
+                    if (getNotIndex(expression) === 0) {
+                        result.not = true;
+                    }
+                    if (result.not === undefined) {
+                        result.not = false;
+                    }
+                    const rules = buildObject(partExpresssion);
+                    result.rules.push(rules);
+                }
+                else {
+                    //operator is Exists
+                    console.log('there is an exist');
+                }
+
+            } else {
+                console.log('I was here');
+
+            }
+        });
+
+        return result;
+    }
+
+    function getNotIndex(expression) {
+        var notIndex = expression.indexOf("NOT");
+        if (notIndex === -1) {
+            notIndex = expression.indexOf("not");
+            if (notIndex === -1) {
+                notIndex = expression.indexOf("Not");
+            }
+        }
+        return notIndex;
+    }
     function isSimpleCompareCondition(data) {
         if (data.indexOf('AND') === -1 && data.indexOf('OR') === -1) {
             return true;
@@ -118,14 +235,14 @@
                 couplesIndex = dicPCouplesSource.length;
                 coupleToCloseFounded = false;
                 while (couplesIndex > 0) {
-                    if (dicPCouplesSource[couplesIndex - 1].ClosePIndex == -1) {
+                    if (dicPCouplesSource[couplesIndex - 1].ClosePIndex === -1) {
                         dicPCouplesSource[couplesIndex - 1].ClosePIndex = indexOfCharInCondition;
                         coupleToCloseFounded = true;
                         break;
                     }
                     couplesIndex--;
                 }
-                if (coupleToCloseFounded == false) {
+                if (coupleToCloseFounded === false) {
                     return "error";
                 }
             }
