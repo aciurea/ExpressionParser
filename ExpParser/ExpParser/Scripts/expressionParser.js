@@ -216,25 +216,31 @@ $(document).ready(function () {
     }
     function getCouples(condition) {
         condition = condition.trim();
-
+        debugger;
         var indexOfCharInCondition = -1;
         var indexOfLastOpenP = 0;
         var dicPCouplesSource = [];
         var couplesIndex = -1;
         var coupleToCloseFounded = false;
-
+        let indexPGOpen = -1;
+        let indexPGClose = -1;
 
         for (var c of condition) {
 
             indexOfCharInCondition++;
             if (c === '(') {
                 indexOfLastOpenP++;
-                dicPCouplesSource.push({ OpenPIndex: indexOfCharInCondition, ClosePIndex: -1 });
+                //are multiple paranthesis open, we deal with a group
+                if (indexOfLastOpenP > 1 && dicPCouplesSource[dicPCouplesSource.length - 1].ClosePIndex === -1) {
+                    dicPCouplesSource[dicPCouplesSource.length - 1].isGroup = true;
+                }
+                dicPCouplesSource.push({ OpenPIndex: indexOfCharInCondition, ClosePIndex: -1, isGroup: false });
             }
             else if (c === ')') {
                 couplesIndex = dicPCouplesSource.length;
                 coupleToCloseFounded = false;
                 while (couplesIndex > 0) {
+                    indexOfLastOpenP--;
                     if (dicPCouplesSource[couplesIndex - 1].ClosePIndex === -1) {
                         dicPCouplesSource[couplesIndex - 1].ClosePIndex = indexOfCharInCondition;
                         coupleToCloseFounded = true;
