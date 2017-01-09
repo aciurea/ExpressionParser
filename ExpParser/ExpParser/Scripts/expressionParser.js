@@ -2,7 +2,6 @@
 $(document).ready(function () {
     $("#btnExpressionParser").on("click", function () {
         const data = $("#txtExpression").val();
-        debugger;
         const result = parseExpression(data);
         $('#builder-basic').queryBuilder('setRules', result);
     });
@@ -150,50 +149,10 @@ $(document).ready(function () {
 
     function buildObjectWhenMultipleExpression(expression, result) {
         const couples = getCouples(expression);
-        const insideCouples = getCouplesFromGroup(couples, expression);
 
-        insideCouples.forEach(function (couple) {
-            //is group
-            if (couple.isGroup) {
-
-            }
-                //are rules
-            else {
-
-            }
-        });
-
-        debugger;
-        var groupIndex = 0;
-        var operator = { index: 0 };
-        insideCouples.forEach(function (couple) {
-            const partExpresssion = expression.substring(couple.OpenPIndex, couple.ClosePIndex).trim();
-            if (isSimpleCompareCondition(partExpresssion)) {
-                if (partExpresssion.startsWith('(')) {
-                    //no Exists operator here
-                    operator = getOperatorIndex(expression);
-                    if (result === undefined) {
-                        result = { condition: operator.op, rules: [] }
-                    }
-                    if (getNotIndex(expression) === 0) {
-                        result.not = true;
-                    }
-                    if (result.not === undefined) {
-                        result.not = false;
-                    }
-                    const rules = buildObject(partExpresssion);
-                    result.rules.push(rules);
-                }
-                else {
-                    //operator is Exists
-                    console.log('there is an exist');
-                }
-
-            } else {
-                console.log('I was here');
-
-            }
-        });
+        for (let couple of couples) {
+            console.log("\n", couple);
+        }
 
         return result;
     }
@@ -216,14 +175,11 @@ $(document).ready(function () {
     }
     function getCouples(condition) {
         condition = condition.trim();
-        debugger;
         var indexOfCharInCondition = -1;
         var indexOfLastOpenP = 0;
         var dicPCouplesSource = [];
         var couplesIndex = -1;
         var coupleToCloseFounded = false;
-        let indexPGOpen = -1;
-        let indexPGClose = -1;
 
         for (var c of condition) {
 
@@ -240,10 +196,10 @@ $(document).ready(function () {
                 couplesIndex = dicPCouplesSource.length;
                 coupleToCloseFounded = false;
                 while (couplesIndex > 0) {
-                    indexOfLastOpenP--;
                     if (dicPCouplesSource[couplesIndex - 1].ClosePIndex === -1) {
                         dicPCouplesSource[couplesIndex - 1].ClosePIndex = indexOfCharInCondition;
                         coupleToCloseFounded = true;
+                        indexOfLastOpenP--;
                         break;
                     }
                     couplesIndex--;
