@@ -7,6 +7,7 @@
 
     $('#btnParse').on('click', function () {
         const expressionData = $('#builder-basic').queryBuilder('getRules');
+        console.log("expression from query builder: ", expressionData)
         if ($.isEmptyObject(expressionData)) return;
         var parsedExpression = parseData(expressionData);
         $('#txtExpression').val(parsedExpression);

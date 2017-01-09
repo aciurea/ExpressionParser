@@ -59,8 +59,8 @@ $(document).ready(function () {
             result.rules.push(rules);
             return result;
         }
-
-        result = buildObjectWhenMultipleExpression(expression);
+        let couples = getCouples(expression);
+        result = buildObjectWhenMultipleExpression(couples);
 
         return result;
     }
@@ -147,11 +147,34 @@ $(document).ready(function () {
         return insideCouples;
     }
 
-    function buildObjectWhenMultipleExpression(expression, result) {
-        const couples = getCouples(expression);
+    function buildObjectWhenMultipleExpression(couples) {
+        debugger;
+        let result;
+        let groupPCIndex = 0;
+
+        /*
+        IMPORTANT
+        if are multiple groups inside a group add a variable to store the level of group. It is possible 
+        to have multiple level. A while loop might be necessary. */
 
         for (let couple of couples) {
-            console.log("\n", couple);
+
+        //if is group, set groupPCIndex to ClosePIndex
+            if (couple.isGroup) {
+                groupPCIndex = couple.ClosePIndex;
+                console.log('I am a group');
+            }
+
+        //if closePIndex is less than grouPCIndex, is inside group
+            if (groupPCIndex > couple.ClosePIndex) {
+
+            }
+            else {
+                //add normal rules
+                console.log('add normal rules');
+            }
+
+
         }
 
         return result;
