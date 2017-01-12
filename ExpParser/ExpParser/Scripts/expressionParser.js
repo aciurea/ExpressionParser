@@ -2,98 +2,26 @@
 $(document).ready(function () {
     $("#btnExpressionParser").on("click", function () {
         const data = $("#txtExpression").val();
-        const result = parseExpression(data);
+        const result = analyzeCondition(data);
         $('#builder-basic').queryBuilder('setRules', result);
     });
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
-    function getCompareSign(data) {
-        var res = {};
 
-        operators.some(function (op) {
-            const currentOpIndex = data.indexOf(op);
-            return currentOpIndex !== -1 ? res = { operator: op, index: currentOpIndex } : res = "";
-        });
-        return res;
-    }
-
-    function buildObject(data) {
-        data.trim();
-        const res = getCompareSign(data);
-        if (res === "") {
-            if (data.indexOf('Exists') === 0) {
-                const value = data.substring(data.indexOf('(') + 1);
-                return {
-                    operator: "exists",
-                    field: value,
-                    id: value,
-                    input: "text",
-                    type: "string",
-                    value: null
-                }
-            }
-        }
-        const parameter = data.substring(1, res.index).trim();
-        const valueIndex = res.index + res.operator.length + 1;
-        const valueToCompareTo = data.substring(valueIndex, data.length - 1);
-        const op = getOperator(res.operator);
-        const result = {
-            operator: op.text,
-            field: parameter.toLowerCase(),
-            id: parameter.toLowerCase(),
-            input: "text",
-            type: "string",
-            value: valueToCompareTo.trim()
-        };
-        return result;
-    }
-
-    function parseExpression(data) {
-        const result = analyzeCondition(data);
-        return result;
-    }
-
-    function analyzeCondition(expression, result) {
+    function analyzeCondition(expression) {
+        let result;
         if (isSimpleCompareCondition(expression)) {
             const rules = buildObject(expression);
             result = { condition: "AND", not: false, rules: [] };
             result.rules.push(rules);
             return result;
         }
-        let couples = getCouples(expression);
-        result = buildObjectWhenMultipleExpression(couples);
+        const couples = getCouples(expression);
+        result = buildObjectWhenMultipleExpression(couples, expression);
 
         return result;
     }
-    function getOperatorIndex(data) {
-        var index = data.indexOf("AND");
-        var operator = "AND";
-        if (index === -1) {
-            index = data.indexOf("OR") + 2;
-            operator = "OR";
-            index += 2;
-        } else {
-            index += 3;
-        }
 
-        return { index: index, op: operator };
-    }
-    function detectCouple(expression, couple) {
-        var partCond = expression.substring(couple.OpenPIndex, couple.ClosePIndex);
-        if ((partCond.indexOf("AND") !== -1) || partCond.indexOf("OR") !== -1) {
-            return true;
-        }
-        return false;
-    }
 
-    function getLastIndexCouple(couples, parentCouple) {
-        var counter = 0;
-        for (var c of couples) {
-            if (c.OpenPIndex > parentCouple.ClosePIndex) {
-                counter++;
-            }
-        }
-        return counter;
-    }
     function getCouplesFromGroup(couples, expression) {
         debugger;
         let defaultCouple = couples.shift(); const insideCouples = []; let isGroup = false; let c = {}; const insideRules = []; let isFirstTime = true; let counter = 0;
@@ -147,10 +75,19 @@ $(document).ready(function () {
         return insideCouples;
     }
 
-    function buildObjectWhenMultipleExpression(couples) {
+
+    function isSimpleCompareCondition(data) {
+        if (data.indexOf('AND') === -1 && data.indexOf('OR') === -1) {
+            return true;
+        };
+        return false;
+    }
+
+    function buildObjectWhenMultipleExpression(couples, expression) {
         debugger;
         let result;
         let groupPCIndex = 0;
+        let index = 0;
 
         /*
         IMPORTANT
@@ -171,30 +108,91 @@ $(document).ready(function () {
             }
             else {
                 //add normal rules
+                var prevRes = getDataFromSimpleExpression(couple, expression, index);
+                var operator = getOperatorIndex(expression, couple.ClosePIndex);
+                //no not for the moment 
+                index = couple.ClosePIndex + operator.index;
                 console.log('add normal rules');
             }
 
 
         }
+        return result;
+    }
+
+    function getDataFromSimpleExpression(couple, expression, index) {
+        const compareValue = expression.substring(index, couple.OpenPIndex);
+        let result;
+        //is expression with exists
+        if (compareValue.indexOf("Exists") === 0) {
+            result = getValuesFromExistsExp(couple, expression);
+        }
+            //if not, build a normal object from expression
+        else {
+            result = getValuesFromNormalExp();
+        }
 
         return result;
     }
 
-    function getNotIndex(expression) {
-        var notIndex = expression.indexOf("NOT");
+    function getValuesFromNormalExp() {
+        const res = getCompareSign(data);
+        const parameter = data.substring(1, res.index).trim();
+        const valueIndex = res.index + res.operator.length + 1;
+        const valueToCompareTo = data.substring(valueIndex, data.length - 1);
+        const op = getOperator(res.operator);
+        const result = {
+            operator: op.text,
+            field: parameter.toLowerCase(),
+            id: parameter.toLowerCase(),
+            input: "text",
+            type: "string",
+            value: valueToCompareTo.trim()
+        };
+    }
+
+    function getValuesFromExistsExp(couple, expression) {
+        const value = expression.substring(couple.OpenPIndex + 1, couple.ClosePIndex);
+        return {
+            operator: "exists",
+            field: value,
+            id: value,
+            input: "text",
+            type: "string",
+            value: null
+        }
+    }
+    function getCompareSign(data) {
+        var res = {};
+
+        operators.some(function (op) {
+            const currentOpIndex = data.indexOf(op);
+            return currentOpIndex !== -1 ? res = { operator: op, index: currentOpIndex } : res = "";
+        });
+        return res;
+    }
+    function getNotIndex(expression, fromIndex) {
+        var notIndex = expression.indexOf("NOT", fromIndex);
         if (notIndex === -1) {
-            notIndex = expression.indexOf("not");
+            notIndex = expression.indexOf("not", fromIndex);
             if (notIndex === -1) {
-                notIndex = expression.indexOf("Not");
+                notIndex = expression.indexOf("Not", fromIndex);
             }
         }
         return notIndex;
     }
-    function isSimpleCompareCondition(data) {
-        if (data.indexOf('AND') === -1 && data.indexOf('OR') === -1) {
-            return true;
-        };
-        return false;
+    function getOperatorIndex(data, fromIndex) {
+        var index = data.indexOf("AND", fromIndex);
+        var operator = "AND";
+        if (index === -1) {
+            index = data.indexOf("OR", fromIndex) + 2;
+            operator = "OR";
+            index += 2;
+        } else {
+            index += 3;
+        }
+
+        return { index: index, op: operator };
     }
     function getCouples(condition) {
         condition = condition.trim();
