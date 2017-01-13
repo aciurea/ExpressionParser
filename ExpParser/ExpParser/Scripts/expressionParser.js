@@ -110,7 +110,11 @@ $(document).ready(function () {
                 //add normal rules
                 var prevRes = getDataFromSimpleExpression(couple, expression, index);
                 var operator = getOperatorIndex(expression, couple.ClosePIndex);
-                //no not for the moment 
+                //no not for the moment
+                if (!result) {
+                    result = { condition: operator.op, not: false, rules: [] }
+                }
+                result.rules.push(prevRes);
                 index = couple.ClosePIndex + operator.index;
                 console.log('add normal rules');
             }
@@ -121,7 +125,7 @@ $(document).ready(function () {
     }
 
     function getDataFromSimpleExpression(couple, expression, index) {
-        const compareValue = expression.substring(index, couple.OpenPIndex);
+        const compareValue = expression.substring(index, couple.OpenPIndex).trim();
         let result;
         //is expression with exists
         if (compareValue.indexOf("Exists") === 0) {
@@ -129,17 +133,45 @@ $(document).ready(function () {
         }
             //if not, build a normal object from expression
         else {
-            result = getValuesFromNormalExp();
+            result = getValuesFromNormalExp(couple, expression, index);
         }
 
         return result;
     }
 
-    function getValuesFromNormalExp() {
-        const res = getCompareSign(data);
-        const parameter = data.substring(1, res.index).trim();
-        const valueIndex = res.index + res.operator.length + 1;
-        const valueToCompareTo = data.substring(valueIndex, data.length - 1);
+
+
+
+    
+    function getNotIndex(expression, fromIndex) {
+        var notIndex = expression.indexOf("NOT", fromIndex);
+        if (notIndex === -1) {
+            notIndex = expression.indexOf("not", fromIndex);
+            if (notIndex === -1) {
+                notIndex = expression.indexOf("Not", fromIndex);
+            }
+        }
+        return notIndex;
+    }
+
+
+    function getCompareSign(data, fromIndex, couple) {
+        const expression = data.slice(couple.OpenPIndex, couple.ClosePIndex);
+        var opr;
+        operators.some(function (op) {
+            const o = expression.indexOf(op);
+            if (o !== -1) {
+                opr = op;
+            }
+            return opr;
+        });
+        const currentOpIndex = data.indexOf(opr, fromIndex);
+        return { operator: opr, index: currentOpIndex };
+    }
+    function getValuesFromNormalExp(couple, expression, index) {
+        const res = getCompareSign(expression, index, couple);
+        const parameter = expression.substring(couple.OpenPIndex + 1, res.index).trim();
+        const valueToCompareTo = expression.substring(res.index + res.operator.length + 1, couple.ClosePIndex - 1);
         const op = getOperator(res.operator);
         const result = {
             operator: op.text,
@@ -149,8 +181,8 @@ $(document).ready(function () {
             type: "string",
             value: valueToCompareTo.trim()
         };
+        return result;
     }
-
     function getValuesFromExistsExp(couple, expression) {
         const value = expression.substring(couple.OpenPIndex + 1, couple.ClosePIndex);
         return {
@@ -162,34 +194,15 @@ $(document).ready(function () {
             value: null
         }
     }
-    function getCompareSign(data) {
-        var res = {};
-
-        operators.some(function (op) {
-            const currentOpIndex = data.indexOf(op);
-            return currentOpIndex !== -1 ? res = { operator: op, index: currentOpIndex } : res = "";
-        });
-        return res;
-    }
-    function getNotIndex(expression, fromIndex) {
-        var notIndex = expression.indexOf("NOT", fromIndex);
-        if (notIndex === -1) {
-            notIndex = expression.indexOf("not", fromIndex);
-            if (notIndex === -1) {
-                notIndex = expression.indexOf("Not", fromIndex);
-            }
-        }
-        return notIndex;
-    }
     function getOperatorIndex(data, fromIndex) {
         var index = data.indexOf("AND", fromIndex);
         var operator = "AND";
         if (index === -1) {
             index = data.indexOf("OR", fromIndex) + 2;
             operator = "OR";
-            index += 2;
+            index = 4;       //2 charachters + 2 for spaceses 
         } else {
-            index += 3;
+            index = 5;
         }
 
         return { index: index, op: operator };

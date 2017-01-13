@@ -7,19 +7,24 @@
 
     $('#btnParse').on('click', function () {
         const expressionData = $('#builder-basic').queryBuilder('getRules');
-        console.log("expression from query builder: ", expressionData)
+        console.log(expressionData);
         if ($.isEmptyObject(expressionData)) return;
         var parsedExpression = parseData(expressionData);
         $('#txtExpression').val(parsedExpression);
     });
+    $('#btnOldImpl').click(function () {
+        $("#oldContent").toggleClass("tglOldImpl");
+        $('i.glyphicon').toggleClass("glyphicon-menu-up").toggleClass("glyphicon-menu-down");
+    });
+
     $('#btnLoadExpression').on('click', function () {
         const expression = $('#txtParseResult').val();
         loadExpressionFromServer(expression);
     });
-    
+
 });
 function setFilters() {
-    $.getJSON("filters.json", function (data) {
+    $.getJSON("./filters.json", function (data) {
         options.filters = data;
         const sessionParams = loadSessionParameters();
 
@@ -56,7 +61,7 @@ const options = {
 };
 function loadSessionParameters() {
     const parameters = $("#sessionParameters").val();
-    return parameters !== undefined ? JSON.parse(parameters) : null;
+    return parameters !== "" ? JSON.parse(parameters) : null;
 }
 function AddValues(data) {
     return {
@@ -250,7 +255,7 @@ function getOperatorSymbol(operator) {
 function getOperator(operatorSymbol) {
     switch (operatorSymbol) {
         case "=": return { text: "equal", isBasic: true };
-        case "<>": return { text: "not_equal>", isBasic: true };
+        case "<>": return { text: "not_equal", isBasic: true };
         case "<": return { text: "less", isBasic: true };
         case "<=":
         case "=<": return { text: "less_or_equal", isBasic: true };
