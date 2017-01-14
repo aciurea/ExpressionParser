@@ -10,73 +10,54 @@ $(document).ready(function () {
     function analyzeCondition(expression) {
         let result;
         const couples = getCouples(expression);
+        const groupedCouples = getGroupCouples(couples, 0);
+        console.log(groupedCouples);
         result = buildObjectWhenMultipleExpression(couples, expression);
 
         return result;
     }
 
-
-    function getCouplesFromGroup(couples, expression) {
+    function getGroupCouples(couples, lastIndexRule, isInGroup) {
         debugger;
-        let defaultCouple = couples.shift(); const insideCouples = []; let isGroup = false; let c = {}; const insideRules = []; let isFirstTime = true; let counter = 0;
-        let lastIndexOfGroup = 0;
-        couples.forEach(function (couple) {
-            if (couple.OpenPIndex < lastIndexOfGroup) { return; }
-            //couple with couples
-            if (defaultCouple.ClosePIndex > couple.OpenPIndex) {
-                const isCoupleInside = detectCouple(expression, couple);
-                if (isCoupleInside) {
-                    //need to do it recursively
-                    const index = getLastIndexCouple(couples, couple);
-                    const data = couples.slice(counter, couples.length - index);
-                    const result = getCouplesFromGroup(data, expression);
-                    console.log(result);
-                    insideRules.push(result);
-                    lastIndexOfGroup = result[result.length - 1].rules[result[result.length - 1].rules.length - 1].ClosePIndex;
-                    defaultCouple = couple;
-                    return;
-                }
-                counter++;
-                isGroup = true;
-                c = { OpenPIndex: couple.OpenPIndex, ClosePIndex: couple.ClosePIndex };
-                insideRules.push(c);
-                isFirstTime = false;
-
-            } else {
-                counter++;
-                if (isGroup) {
-                    var prevRes = { isGroup: true, rules: insideRules.slice() };
-                    insideCouples.push(prevRes);
-                    insideRules.length = 0;
-                };
-                if (couples[counter]) {
-                    if (couple.ClosePIndex > couples[counter].ClosePIndex) { defaultCouple = couple; return; }
-                }
-                c = { OpenPIndex: couple.OpenPIndex, ClosePIndex: couple.ClosePIndex };
-                if (couples.length === 1 || isFirstTime) {
-                    insideCouples.push(defaultCouple, c);
-                    isFirstTime = false;
-                }
-                else { insideCouples.push(c) }
-                isGroup = false;
+        let groupedCouples = [];
+        for(let couple of couples) {
+            if (couple.ClosePIndex <= lastIndexRule && !isInGroup) {
+                //ignore the rule/couple
             }
-        });
-        if (isGroup) {
-            var prevRes = { isGroup: true, rules: insideRules };
-            insideCouples.push(prevRes);
-        };
-        console.log("Exit from group", insideCouples);
+            else {
+                if (couple.isGroup) {
+                    isInGroup = true;
+                    let grCouples = getCouplesFromGroup(couples, couple);
+                    lastIndexRule = grCouples[grCouples.length - 1].ClosePIndex;
+                    let prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
+                    isInGroup = false;
+                    if (groupedCouples.couples == undefined) {
+                        let prevCouples = { isGroup: true, couples: new Array(prevRes) };
+                        groupedCouples.push(prevCouples);
+                    }
+                    else {
+                        let prevCouples = { isGroup: true, couples: prevRes };
+                        groupedCouples.push(prevCouples);
+                    }
+                }
+                else {
+                    groupedCouples.push(couple);
+                }
+            }
+        }
+
+        return groupedCouples;
+    }
+
+
+    function getCouplesFromGroup(couples, couple) {
+        let insideCouples = [];
+        for(var c of couples) {
+            if (c.ClosePIndex < couple.ClosePIndex)
+                insideCouples.push(c);
+        }
         return insideCouples;
     }
-    function isSimpleCompareCondition(data) {
-        if (data.indexOf('AND') === -1 && data.indexOf('OR') === -1) {
-            return true;
-        };
-        return false;
-    }
-
-
-
 
     function buildObjectWhenMultipleExpression(couples, expression) {
         debugger;
@@ -103,6 +84,8 @@ $(document).ready(function () {
                 groupProp = { groupPCIndex: couple.ClosePIndex, condition: operator.op, not: false };
                 index = couple.OpenPIndex + 1;
             }
+
+
                 //if closePIndex is less than grouPCIndex, is inside group
             else if (groupProp.groupPCIndex > couple.ClosePIndex) {
                 var values = getDataFromSimpleExpression(couple, expression, index);
@@ -142,7 +125,7 @@ $(document).ready(function () {
     }
 
 
-    function checkForNesteGroup(couple, couples) {
+    function checkForNestedGroup(couple, couples) {
 
     }
 
