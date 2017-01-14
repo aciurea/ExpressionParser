@@ -9,12 +9,6 @@ $(document).ready(function () {
 
     function analyzeCondition(expression) {
         let result;
-        if (isSimpleCompareCondition(expression)) {
-            const rules = buildObject(expression);
-            result = { condition: "AND", not: false, rules: [] };
-            result.rules.push(rules);
-            return result;
-        }
         const couples = getCouples(expression);
         result = buildObjectWhenMultipleExpression(couples, expression);
 
@@ -74,8 +68,6 @@ $(document).ready(function () {
         console.log("Exit from group", insideCouples);
         return insideCouples;
     }
-
-
     function isSimpleCompareCondition(data) {
         if (data.indexOf('AND') === -1 && data.indexOf('OR') === -1) {
             return true;
@@ -83,66 +75,79 @@ $(document).ready(function () {
         return false;
     }
 
+
+
+
     function buildObjectWhenMultipleExpression(couples, expression) {
         debugger;
         let result;
-        let groupPCIndex = 0;
         let index = 0;
-
+        let isNestedGroup = false;
+        let groupProp = {};
+        let indexOfGroups = 0;
         /*
         IMPORTANT
         if are multiple groups inside a group add a variable to store the level of group. It is possible 
         to have multiple level. A while loop might be necessary. */
 
         for (let couple of couples) {
-
         //if is group, set groupPCIndex to ClosePIndex
             if (couple.isGroup) {
-                groupPCIndex = couple.ClosePIndex;
-                console.log('I am a group');
+                //isNestedGroup = checkForNestedGroup(couple, couples)
+                //if (couples[indexCouples + 1] && couples[indexCouples + 1].isGroup) {
+                //    //there is another couple inside couple
+                //}
+                //groupPCIndex++;
+                indexOfGroups++;
+                var operator = getOperatorIndex(expression, couple.ClosePIndex);
+                groupProp = { groupPCIndex: couple.ClosePIndex, condition: operator.op, not: false };
+                index = couple.OpenPIndex + 1;
+            }
+                //if closePIndex is less than grouPCIndex, is inside group
+            else if (groupProp.groupPCIndex > couple.ClosePIndex) {
+                var values = getDataFromSimpleExpression(couple, expression, index);
+                var operator = getOperatorIndex(expression, couple.ClosePIndex);
+                var prevRes = {};
+
+                if (!result) {
+                    prevRes = { condition: operator.op, not: false, rules: new Array(values) };
+                    result = { condition: groupProp.condition, not: groupProp.not, rules: new Array(prevRes) }
+                }
+                    //is nextGroup
+                else if (indexOfGroups > 1) {
+                    prevRes = { condition: operator.op, not: false, rules: new Array(values) };
+                    result.rules.push(prevRes);
+                    indexOfGroups--;
+                }
+                else {
+                    //var prevValues = new Array(values);
+                    result.rules[result.rules.length - 1].rules.push(values);
+                }
+                index = couple.ClosePIndex + operator.index;
             }
 
-        //if closePIndex is less than grouPCIndex, is inside group
-            if (groupPCIndex > couple.ClosePIndex) {
-
-            }
-            else {
-                //add normal rules
-                var prevRes = getDataFromSimpleExpression(couple, expression, index);
+                //no Groups, just normal rules
+            else if (!couple.isGroup) {
+                var values = getDataFromSimpleExpression(couple, expression, index);
                 var operator = getOperatorIndex(expression, couple.ClosePIndex);
                 //no not for the moment
                 if (!result) {
                     result = { condition: operator.op, not: false, rules: [] }
                 }
-                result.rules.push(prevRes);
+                result.rules.push(values);
                 index = couple.ClosePIndex + operator.index;
-                console.log('add normal rules');
             }
-
-
         }
         return result;
     }
 
-    function getDataFromSimpleExpression(couple, expression, index) {
-        const compareValue = expression.substring(index, couple.OpenPIndex).trim();
-        let result;
-        //is expression with exists
-        if (compareValue.indexOf("Exists") === 0) {
-            result = getValuesFromExistsExp(couple, expression);
-        }
-            //if not, build a normal object from expression
-        else {
-            result = getValuesFromNormalExp(couple, expression, index);
-        }
 
-        return result;
+    function checkForNesteGroup(couple, couples) {
+
     }
 
 
 
-
-    
     function getNotIndex(expression, fromIndex) {
         var notIndex = expression.indexOf("NOT", fromIndex);
         if (notIndex === -1) {
@@ -155,6 +160,11 @@ $(document).ready(function () {
     }
 
 
+    function getDataFromSimpleExpression(couple, expression, index) {
+        const compareValue = expression.substring(index, couple.OpenPIndex).trim();
+
+        return compareValue.indexOf("Exists") === 0 ? getValuesFromExistsExp(couple, expression) : getValuesFromNormalExp(couple, expression, index);
+    }
     function getCompareSign(data, fromIndex, couple) {
         const expression = data.slice(couple.OpenPIndex, couple.ClosePIndex);
         var opr;
