@@ -32,7 +32,7 @@ $(document).ready(function () {
                     let prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
                     isInGroup = false;
                     if (groupedCouples.couples == undefined) {
-                        let prevCouples = { isGroup: true, couples: new Array(prevRes) };
+                        const prevCouples = { isGroup: true, couples: prevRes };
                         groupedCouples.push(prevCouples);
                     }
                     else {
@@ -53,7 +53,7 @@ $(document).ready(function () {
     function getCouplesFromGroup(couples, couple) {
         let insideCouples = [];
         for(var c of couples) {
-            if (c.ClosePIndex < couple.ClosePIndex)
+            if (c.ClosePIndex < couple.ClosePIndex && c.OpenPIndex > couple.OpenPIndex)
                 insideCouples.push(c);
         }
         return insideCouples;
