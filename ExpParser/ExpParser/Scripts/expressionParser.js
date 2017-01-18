@@ -12,67 +12,26 @@ $(document).ready(function () {
         const couples = getCouples(expression);
         const groupedCouples = getGroupCouples(couples, 0);
         console.log(groupedCouples);
-        result = buildObjectWhenMultipleExpression(couples, expression);
+        result = buildObjectWhenMultipleExpression(groupedCouples, expression);
 
         return result;
     }
 
-    function getGroupCouples(couples, lastIndexRule, isInGroup) {
-        debugger;
-        let groupedCouples = [];
-        for(let couple of couples) {
-            if (couple.ClosePIndex <= lastIndexRule && !isInGroup) {
-                //ignore the rule/couple
-            }
-            else {
-                if (couple.isGroup) {
-                    isInGroup = true;
-                    let grCouples = getCouplesFromGroup(couples, couple);
-                    lastIndexRule = grCouples[grCouples.length - 1].ClosePIndex;
-                    let prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
-                    isInGroup = false;
-                    if (groupedCouples.couples == undefined) {
-                        const prevCouples = { isGroup: true, couples: prevRes };
-                        groupedCouples.push(prevCouples);
-                    }
-                    else {
-                        let prevCouples = { isGroup: true, couples: prevRes };
-                        groupedCouples.push(prevCouples);
-                    }
-                }
-                else {
-                    groupedCouples.push(couple);
-                }
-            }
-        }
-
-        return groupedCouples;
-    }
+   
 
 
-    function getCouplesFromGroup(couples, couple) {
-        let insideCouples = [];
-        for(var c of couples) {
-            if (c.ClosePIndex < couple.ClosePIndex && c.OpenPIndex > couple.OpenPIndex)
-                insideCouples.push(c);
-        }
-        return insideCouples;
-    }
+
 
     function buildObjectWhenMultipleExpression(couples, expression) {
         debugger;
         let result;
         let index = 0;
-        let isNestedGroup = false;
         let groupProp = {};
         let indexOfGroups = 0;
-        /*
-        IMPORTANT
-        if are multiple groups inside a group add a variable to store the level of group. It is possible 
-        to have multiple level. A while loop might be necessary. */
-
+      
         for (let couple of couples) {
-        //if is group, set groupPCIndex to ClosePIndex
+
+        //if is group, do it recursively 
             if (couple.isGroup) {
                 //isNestedGroup = checkForNestedGroup(couple, couples)
                 //if (couples[indexCouples + 1] && couples[indexCouples + 1].isGroup) {
@@ -125,11 +84,6 @@ $(document).ready(function () {
     }
 
 
-    function checkForNestedGroup(couple, couples) {
-
-    }
-
-
 
     function getNotIndex(expression, fromIndex) {
         var notIndex = expression.indexOf("NOT", fromIndex);
@@ -142,7 +96,43 @@ $(document).ready(function () {
         return notIndex;
     }
 
-
+    function getGroupCouples(couples, lastIndexRule, isInGroup) {
+        const groupedCouples = [];
+        for(let couple of couples) {
+            if (couple.ClosePIndex <= lastIndexRule && !isInGroup) {
+                //ignore the rule/couple
+            }
+            else {
+                if (couple.isGroup) {
+                    isInGroup = true;
+                    const grCouples = getCouplesFromGroup(couples, couple);
+                    lastIndexRule = couple.ClosePIndex;
+                    const prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
+                    isInGroup = false;
+                    if (groupedCouples.couples == undefined) {
+                        const prevCouples = { isGroup: true, couples: prevRes };
+                        groupedCouples.push(prevCouples);
+                    }
+                    else {
+                        const prevCouples = { isGroup: true, couples: prevRes };
+                        groupedCouples.push(prevCouples);
+                    }
+                }
+                else {
+                    groupedCouples.push(couple);
+                }
+            }
+        }
+        return groupedCouples;
+    }
+    function getCouplesFromGroup(couples, couple) {
+        const insideCouples = [];
+        for(let c of couples) {
+            if (c.ClosePIndex < couple.ClosePIndex && c.OpenPIndex > couple.OpenPIndex)
+                insideCouples.push(c);
+        }
+        return insideCouples;
+    }
     function getDataFromSimpleExpression(couple, expression, index) {
         const compareValue = expression.substring(index, couple.OpenPIndex).trim();
 
