@@ -8,66 +8,39 @@ $(document).ready(function () {
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
 
     function analyzeCondition(expression) {
-        let result;
         const couples = getCouples(expression);
         const groupedCouples = getGroupCouples(couples, 0);
         console.log(groupedCouples);
-        result = buildObjectWhenMultipleExpression(groupedCouples, expression);
+        const result = buildObjectFromExpression(groupedCouples, expression, 0);
 
         return result;
     }
 
-   
 
 
 
 
-    function buildObjectWhenMultipleExpression(couples, expression) {
+
+    function buildObjectFromExpression(couples, expression, index) {
         debugger;
         let result;
-        let index = 0;
-        let groupProp = {};
-        let indexOfGroups = 0;
-      
+        if (!(couples instanceof Array)) {
+            couples = new Array(couples);
+            couples = couples[0].couples;
+        }
         for (let couple of couples) {
 
         //if is group, do it recursively 
             if (couple.isGroup) {
-                //isNestedGroup = checkForNestedGroup(couple, couples)
-                //if (couples[indexCouples + 1] && couples[indexCouples + 1].isGroup) {
-                //    //there is another couple inside couple
-                //}
-                //groupPCIndex++;
-                indexOfGroups++;
-                var operator = getOperatorIndex(expression, couple.ClosePIndex);
-                groupProp = { groupPCIndex: couple.ClosePIndex, condition: operator.op, not: false };
-                index = couple.OpenPIndex + 1;
-            }
-
-
-                //if closePIndex is less than grouPCIndex, is inside group
-            else if (groupProp.groupPCIndex > couple.ClosePIndex) {
-                var values = getDataFromSimpleExpression(couple, expression, index);
-                var operator = getOperatorIndex(expression, couple.ClosePIndex);
-                var prevRes = {};
-
+                index = couple.couples[0].OpenPIndex;
+                const prevRes = buildObjectFromExpression(couple, expression, index);
+                const operator = getOperatorIndex(expression, couple.ClosePIndex);
                 if (!result) {
-                    prevRes = { condition: operator.op, not: false, rules: new Array(values) };
-                    result = { condition: groupProp.condition, not: groupProp.not, rules: new Array(prevRes) }
+                    result = { condition: operator.op, not: false, rules: prevRes };
+                } else {
+                    result.push();
                 }
-                    //is nextGroup
-                else if (indexOfGroups > 1) {
-                    prevRes = { condition: operator.op, not: false, rules: new Array(values) };
-                    result.rules.push(prevRes);
-                    indexOfGroups--;
-                }
-                else {
-                    //var prevValues = new Array(values);
-                    result.rules[result.rules.length - 1].rules.push(values);
-                }
-                index = couple.ClosePIndex + operator.index;
             }
-
                 //no Groups, just normal rules
             else if (!couple.isGroup) {
                 var values = getDataFromSimpleExpression(couple, expression, index);
