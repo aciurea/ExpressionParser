@@ -145,7 +145,7 @@ $(document).ready(function () {
         const result = {
             operator: op.text,
             field: parameter.toLowerCase(),
-            id: parameter.toLowerCase(),
+            id: parameter,
             input: "text",
             type: "string",
             value: valueToCompareTo.trim()
