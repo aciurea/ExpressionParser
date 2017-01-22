@@ -34,10 +34,9 @@ $(document).ready(function () {
             if (couple.isGroup) {
                 const prevRes = buildObjectFromExpression(couple, expression);
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
-                //checkIndex(expression);
                 index += 1;
                 if (!result) {
-                    result = { condition: operator.op, not: false, rules: new Array(prevRes) };
+                    result = { condition: operator.operator, not: false, rules: new Array(prevRes) };
                 } else {
                     result.rules.push(prevRes);
                 }
@@ -48,7 +47,7 @@ $(document).ready(function () {
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
                 //no not for the moment
                 if (!result) {
-                    result = { condition: operator.op, not: false, rules: [] }
+                    result = { condition: operator.operator, not: false, rules: [] }
                 }
                 result.rules.push(values);
                 index = couple.ClosePIndex + operator.index;
@@ -56,13 +55,6 @@ $(document).ready(function () {
         }
         return result;
     }
-    function checkIndex(expression) {
-        const i = expression.indexOf("(", index);
-        if (i - index >= 2) {
-            index = i + 1;
-        }
-    }
-
 
     function getNotIndex(expression, fromIndex) {
         var notIndex = expression.indexOf("NOT", fromIndex);
@@ -116,6 +108,7 @@ $(document).ready(function () {
     function getDataFromSimpleExpression(couple, expression, index) {
         const compareValue = expression.substring(index, couple.OpenPIndex).trim();
         if (compareValue.indexOf("(Exists") === 0) {
+            console.log(`I've been here.....`);
             index += 1;
             return getValuesFromExistsExp(couple, expression);
         }
@@ -145,7 +138,7 @@ $(document).ready(function () {
         const result = {
             operator: op.text,
             field: parameter.toLowerCase(),
-            id: parameter.toLowerCase(),
+            id: parameter,
             input: "text",
             type: "string",
             value: valueToCompareTo.trim()
@@ -164,17 +157,11 @@ $(document).ready(function () {
         }
     }
     function getOperatorIndex(data, fromIndex) {
-        var index = data.indexOf("AND", fromIndex);
-        var operator = "AND";
-        if (index === -1) {
-            index = data.indexOf("OR", fromIndex) + 2;
-            operator = "OR";
-            index = 4;       //2 charachters + 2 for spaceses 
-        } else {
-            index = 5;
+        const index = data.indexOf("OR", fromIndex);
+        if (index === -1 || index - fromIndex > 5) {
+          return  { index: 5, operator:"AND"};
         }
-
-        return { index: index, op: operator };
+            return { index: 4, operator: "OR" };
     }
     function getCouples(condition) {
         condition = condition.trim();
