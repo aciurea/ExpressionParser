@@ -3,3 +3,6 @@ This is an angular 2 application;
 some modification added here
 Some modification from the server.
 let's see if is working after updateing the source tree
+
+If is not working to communicate between github and your local repository do too firewall:
+http://stackoverflow.com/questions/24907140/git-returns-http-error-407-from-proxy-after-connect

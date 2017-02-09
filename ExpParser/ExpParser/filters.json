@@ -1,0 +1,21 @@
+﻿[
+{ "id": "@Lang", "label": "Lang", "type": "string", "size": 30 },
+{ "id": "@Anid", "label": "anid", "type": "string", "size": 30 },
+{ "id": "@V7", "label": "V7", "type": "string", "size": 30 },
+{ "id": "@Sr", "label": "sr", "type": "string", "size": 30 },
+{ "id": "@Bip", "label": "vip", "type": "string", "size": 30 },
+{ "id": "@Cip", "label": "cip", "type": "string", "size": 30 },
+{ "id": "@Real", "label": "real", "type": "string", "size": 30 },
+{ "id": "@Flag", "label": "flag", "type": "string", "size": 30 },
+{ "id": "@Domain", "label": "Domain", "type": "string", "size": 30 },
+{ "id": "@IC", "label": "IC", "type": "string", "size": 30 },
+{ "id": "@MKW", "label": "MKW", "type": "string", "size": 30 },
+{ "id": "@Reftype", "label": "Reftype", "type": "string", "size": 30 },
+{ "id": "@SearchLang", "label": "SearchLang", "type": "string", "size": 30 },
+{ "id": "@SearchTerm", "label": "SearchTerm", "type": "string", "size": 30 },
+{ "id": "@Country", "label": "Country", "type": "string", "size": 30 },
+{ "id": "@IsWin", "label": "isWin", "type": "string", "size": 30 },
+{ "id": "@Version", "label": "version", "type": "string", "size": 30 },
+{ "id": "@Currency", "label": "currency", "type": "string", "size": 30 },
+{ "id": "@Gpr", "label": "gpr", "type": "string", "size": 30 }
+]
