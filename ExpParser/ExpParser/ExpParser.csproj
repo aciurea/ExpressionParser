@@ -74,6 +74,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="gruntfile.js" />
     <Content Include="packages.config" />
+    <Content Include="Scripts\app\employee.js" />
     <Content Include="Scripts\app\expressionParser.js" />
     <Content Include="filters.json" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
@@ -87,7 +88,7 @@
     <Content Include="package.json" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <Content Include="Scripts\pula.js" />
+    <Content Include="Scripts\app\employeeModule.js" />
     <Content Include="Scripts\jquery-3.1.1.min.js" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -101,7 +102,6 @@
     <Content Include="Scripts\ExpressionParserPlugin.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\query-builder.standalone.min.js" />
-    <Content Include="Scripts\require.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\app\segmentationBuilder.js" />
     <Content Include="Scripts\WebForms\DetailsView.js" />

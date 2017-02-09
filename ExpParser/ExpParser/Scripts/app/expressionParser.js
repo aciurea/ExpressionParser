@@ -158,9 +158,9 @@ $(document).ready(function () {
     function getOperatorIndex(data, fromIndex) {
         const index = data.indexOf("OR", fromIndex);
         if (index === -1 || index - fromIndex > 5) {
-          return  { index: 5, operator:"AND"};
+            return { index: 5, operator: "AND" };
         }
-            return { index: 4, operator: "OR" };
+        return { index: 4, operator: "OR" };
     }
     function getCouples(condition) {
         condition = condition.trim();
@@ -199,6 +199,6 @@ $(document).ready(function () {
             }
         }
         return dicPCouplesSource;
-
     }
 });
+
