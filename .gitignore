@@ -1,0 +1,11 @@
+*.dll
+*.suo
+*.config
+*.map
+*.exe
+*.ps1
+*.nupkg
+*.pdb
+*.xdt
+Debug/
+node_modules/

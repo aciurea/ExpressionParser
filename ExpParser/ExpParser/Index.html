@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Expression Parser</title>
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/query-builder.min.css" rel="stylesheet" />
+    <style>
+        .active {
+            background-color: red !important;
+        }
+    </style>
+</head>
+
+<body class="container">
+    <div style="margin-top:50px;">
+        <input type="text" id="txtExpression" class="form-control" style="width:100%;" />
+    </div>
+    <div id="builder-basic"></div>
+    <hr />
+    <section class="row">
+        <button id="btnReset" class="btn btn-warning">Reset</button>
+        <button id="btnParse" class="btn btn-default">Parse Expression</button>
+        <button id="btnExpressionParser" class="btn btn-info">GO</button>
+    </section>
+
+
+    <script src="Scripts/jquery-3.1.1.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <script src="Scripts/query-builder.standalone.min.js"></script>
+    <!--<script src="Scripts/app/segmentationBuilder.js"></script>
+    <script src="Scripts/app/expressionParser.js"></script>-->
+    <script src="Scripts/app/expParser.js"></script>
+</body>
+</html>
