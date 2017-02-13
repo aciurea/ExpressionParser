@@ -17,3 +17,4 @@ C:\Users\alinci\Desktop\MyProjects\ExpressionParser\ExpParser\ExpParser\bin\Micr
 C:\Users\alinci\Desktop\MyProjects\ExpressionParser\ExpParser\ExpParser\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
 C:\Users\alinci\Desktop\MyProjects\ExpressionParser\ExpParser\ExpParser\obj\Debug\ExpParser.dll
 C:\Users\alinci\Desktop\MyProjects\ExpressionParser\ExpParser\ExpParser\obj\Debug\ExpParser.pdb
+C:\Users\alinci\Desktop\MyProjects\ExpressionParser\ExpParser\ExpParser\obj\Debug\ExpParser.csprojResolveAssemblyReference.cache

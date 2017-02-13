@@ -1,5 +1,4 @@
 *.dll
-*.suo
 *.config
 *.map
 *.exe
@@ -7,5 +6,10 @@
 *.nupkg
 *.pdb
 *.xdt
+*.cache
+*.csproj
+Scripts/dist/app.js
 Debug/
 node_modules/
+v14/
+ExpParser.csproj.user

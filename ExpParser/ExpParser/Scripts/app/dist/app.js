@@ -1,23 +1,84 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-var _modules = require("modules");
+var _employeeModule = require("./employeeModule");
+
+(function () {
+    console.log(_employeeModule.gigel);
+    var emp = new _employeeModule.Employee("Vasilica");
+    var d = emp.doWork();
+    console.log(d);
+})();
+
+},{"./employeeModule":2}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Employee = function () {
+    function Employee(name) {
+        _classCallCheck(this, Employee);
+
+        this._name = name;
+    }
+
+    _createClass(Employee, [{
+        key: "doWork",
+        value: function doWork() {
+            return this._name + " is working";
+        }
+    }, {
+        key: "name",
+        get: function get() {
+            return this._name;
+        }
+    }]);
+
+    return Employee;
+}();
+
+exports.Employee = Employee;
+
+
+var gigel = {
+    "gigel": 1,
+    "ionel": 2,
+    "vasilica": 3
+};
+exports.gigel = gigel;
+var d1 = exports.d1 = 1321321321;
+
+},{}],3:[function(require,module,exports){
+"use strict";
+
+var _segmentationBuilder = require("./segmentationBuilder");
+
+"use strict";
 
 $(document).ready(function () {
+    var index = 0;
     $("#btnExpressionParser").on("click", function () {
         index = 0;
-        var data = $("#txtExpression").val();
-        var result = analyzeCondition(data);
+        debugger;
+        var expression = $("#txtExpression").val();
+        var result = analyzeCondition(expression);
         console.log(result);
 
         $("#builder-basic").queryBuilder("setRules", result);
     });
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
-    var index = 1;
+    //var index = 1;
     function analyzeCondition(expression) {
         var couples = getCouples(expression);
         var groupedCouples = getGroupCouples(couples, 0);
         console.log(groupedCouples);
-        var result = buildObjectFromExpression(groupedCouples, expression, 0);
+        var result = buildObjectFromExpression(groupedCouples, expression);
 
         return result;
     }
@@ -40,24 +101,24 @@ $(document).ready(function () {
                 //if is group, do it recursively 
                 if (couple.isGroup) {
                     var prevRes = buildObjectFromExpression(couple, expression);
-                    var _operator = getOperatorIndex(expression, couple.ClosePIndex);
+                    var operator = getOperatorIndex(expression, couple.ClosePIndex);
                     index += 1;
                     if (!result) {
-                        result = { condition: _operator.operator, not: false, rules: new Array(prevRes) };
+                        result = { condition: operator.operator, not: false, rules: new Array(prevRes) };
                     } else {
                         result.rules.push(prevRes);
                     }
                 }
                 //no Groups, just normal rules
-                else if (!couple.isGroup) {
+                else {
                         var values = getDataFromSimpleExpression(couple, expression, index);
-                        var _operator2 = getOperatorIndex(expression, couple.ClosePIndex);
+                        var _operator = getOperatorIndex(expression, couple.ClosePIndex);
                         //no not for the moment
                         if (!result) {
-                            result = { condition: _operator2.operator, not: false, rules: [] };
+                            result = { condition: _operator.operator, not: false, rules: [] };
                         }
                         result.rules.push(values);
-                        index = couple.ClosePIndex + _operator2.index;
+                        index = couple.ClosePIndex + _operator.index;
                     }
             }
         } catch (err) {
@@ -196,7 +257,7 @@ $(document).ready(function () {
         var res = getCompareSign(expression, index, couple);
         var parameter = expression.substring(couple.OpenPIndex + 1, res.index).trim();
         var valueToCompareTo = expression.substring(res.index + res.operator.length + 1, couple.ClosePIndex - 1);
-        var op = getOperator(res.operator);
+        var op = (0, _segmentationBuilder.getOperator)(res.operator);
         var result = {
             operator: op.text,
             field: parameter.toLowerCase(),
@@ -225,20 +286,17 @@ $(document).ready(function () {
         }
         return { index: 4, operator: "OR" };
     }
-    function getCouples(condition) {
-        condition = condition.trim();
+    function getCouples(expression) {
+        expression = expression.trim();
         var indexOfCharInCondition = -1;
         var indexOfLastOpenP = 0;
         var dicPCouplesSource = [];
-        var couplesIndex = -1;
-        var coupleToCloseFounded = false;
-
         var _iteratorNormalCompletion4 = true;
         var _didIteratorError4 = false;
         var _iteratorError4 = undefined;
 
         try {
-            for (var _iterator4 = condition[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+            for (var _iterator4 = expression[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
                 var c = _step4.value;
 
 
@@ -251,7 +309,9 @@ $(document).ready(function () {
                     }
                     dicPCouplesSource.push({ OpenPIndex: indexOfCharInCondition, ClosePIndex: -1, isGroup: false });
                 } else if (c === ')') {
+                    var couplesIndex = -1;
                     couplesIndex = dicPCouplesSource.length;
+                    var coupleToCloseFounded = false;
                     coupleToCloseFounded = false;
                     while (couplesIndex > 0) {
                         if (dicPCouplesSource[couplesIndex - 1].ClosePIndex === -1) {
@@ -286,10 +346,13 @@ $(document).ready(function () {
     }
 });
 
+},{"./segmentationBuilder":4}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 $(document).ready(function () {
-    debugger;
-    var e = new _modules.Employee("gigel");
-    console.log(e);
     setFilters();
     $("#btnReset").on("click", function () {
         $("#txtParseResult").val("");
@@ -325,10 +388,6 @@ var options = {
     conditions: ["AND", "OR"],
     default_condition: "AND"
 };
-function loadSessionParameters() {
-    var parameters = $("#sessionParameters").val();
-    return parameters !== "" ? JSON.parse(parameters) : null;
-}
 function AddValues(data) {
     return {
         field: data.field,
@@ -340,6 +399,7 @@ function AddValues(data) {
     };
 }
 
+// ######## beautify expression when it comes from server
 function BeautifyLeft(data, index, result) {
     var rules = AddValues(data);
     return result.rules.push(rules);
@@ -377,20 +437,6 @@ function BeautifyExpression(data, result) {
     }
     return result;
 }
-function loadExpressionFromServer(expression) {
-    if (!expression) {
-        expression = $("#txtParseResult").val();
-    }
-    var data = JSON.parse(expression);
-    //const result = BeautifyExpression(data);
-    if (data) {
-        getData(data);
-        $("#builder-basic").queryBuilder("setRules", data);
-    } else {
-        $("#builder-basic").queryBuilder("reset");
-    }
-}
-
 function getData(data) {
     if (data.rules && data.rules[0].condition) {
         getData(data.rules[0]);
@@ -423,14 +469,17 @@ function checkParameters(data) {
     }
 }
 
-function parseLeft(data, result, condition, index, not) {
+// ##### end beautify expression
+
+
+// ####### expression builder ##########
+
+function isBasicOperator(operator) {
+    return operator === "less" || operator === "greater" || operator === "greater_or_equal" || operator === "less_or_equal";
+}
+function parseLeft(data, result, index, condition, not, wasGroup) {
     if (not) {
-        if (data.operator === "less" || data.operator === "greater" || data.operator === "greater_or_equal" || data.operator === "less_or_equal") {
-            result = "(" + result + ")";
-        }
-        result = result.slice(0, -1);
-        result += " " + condition + " " + parseRule(data) + ")";
-        return result;
+        return wasGroup === undefined ? result.slice(0, -1) + " " + condition + " " + parseRule(data) + ")" : result + " " + condition + " " + parseRule(data) + ")";
     }
     return result + " " + condition + " " + parseRule(data);
 }
@@ -438,7 +487,9 @@ function parseRight(data, result, index, condition, not) {
     var prevRes = parseData(data);
     if (not) {
         result = result.slice(0, -1);
-        if (data.not || data.rules.length === 1) return result + " " + condition + " " + prevRes + ")";
+        if (data.not || data.rules.length === 1) {
+            return result + " " + condition + " " + prevRes + ")";
+        }
 
         return result + " " + condition + " (" + prevRes + "))";
     }
@@ -467,11 +518,8 @@ function parseData(data) {
     result = createExpression(data);
     if (data.rules && data.rules.length > 1) {
         for (var i = 1; i < data.rules.length; i++) {
-            if (data.rules[i].condition) {
-                result = parseRight(data.rules[i], result, i, data.condition, data.not);
-            } else {
-                result = parseLeft(data.rules[i], result, data.condition, i, data.not);
-            }
+            var arrP = [data.rules[i], result, i, data.condition, data.not, data.rules[i - 1].condition];
+            result = data.rules[i].condition ? parseRight.apply(undefined, arrP) : parseLeft.apply(undefined, arrP);
         }
     }
     return result;
@@ -482,7 +530,7 @@ function parseRule(rule, not, length) {
     var operator = getOperatorSymbol(rule.operator);
     if (operator) {
         if (operator.isBasic) {
-            if (rule.type === "integer" && (rule.operator === "less" || rule.operator === "greater" || rule.operator === "greater_or_equal" || rule.operator === "less_or_equal")) {
+            if (rule.type === "integer" && isBasicOperator(rule.operator)) {
                 return "(" + rule.id + operator.text + rule.value + ")";
             }
             result = "(" + rule.id + operator.text + "\"" + rule.value + "\")";
@@ -501,6 +549,8 @@ function parseRule(rule, not, length) {
     }
     return "";
 }
+
+// ####### end expression builder ######
 
 function getOperatorSymbol(operator) {
     switch (operator) {
@@ -533,7 +583,7 @@ function getOperatorSymbol(operator) {
     return null;
 }
 
-function getOperator(operatorSymbol) {
+var getOperator = exports.getOperator = function getOperator(operatorSymbol) {
     switch (operatorSymbol) {
         case "=":
             return { text: "equal", isBasic: true };
@@ -561,8 +611,10 @@ function getOperator(operatorSymbol) {
         case "Exists":
             return { text: "exists", isBasic: false };
         default:
-            console.log("Not implemented operator: " + operator);
+            console.log("Not implemented operator: " + operatorSymbol);
     }
 
     return null;
-}
+};
+
+},{}]},{},[1,2,3,4]);
