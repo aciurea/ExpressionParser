@@ -388,10 +388,6 @@ var options = {
     conditions: ["AND", "OR"],
     default_condition: "AND"
 };
-function loadSessionParameters() {
-    var parameters = $("#sessionParameters").val();
-    return parameters !== "" ? JSON.parse(parameters) : null;
-}
 function AddValues(data) {
     return {
         field: data.field,
@@ -403,6 +399,7 @@ function AddValues(data) {
     };
 }
 
+// ######## beautify expression when it comes from server
 function BeautifyLeft(data, index, result) {
     var rules = AddValues(data);
     return result.rules.push(rules);
@@ -440,20 +437,6 @@ function BeautifyExpression(data, result) {
     }
     return result;
 }
-function loadExpressionFromServer(expression) {
-    if (!expression) {
-        expression = $("#txtParseResult").val();
-    }
-    var data = JSON.parse(expression);
-    //const result = BeautifyExpression(data);
-    if (data) {
-        getData(data);
-        $("#builder-basic").queryBuilder("setRules", data);
-    } else {
-        $("#builder-basic").queryBuilder("reset");
-    }
-}
-
 function getData(data) {
     if (data.rules && data.rules[0].condition) {
         getData(data.rules[0]);
@@ -486,14 +469,17 @@ function checkParameters(data) {
     }
 }
 
-function parseLeft(data, result, index, condition, not) {
+// ##### end beautify expression
+
+
+// ####### expression builder ##########
+
+function isBasicOperator(operator) {
+    return operator === "less" || operator === "greater" || operator === "greater_or_equal" || operator === "less_or_equal";
+}
+function parseLeft(data, result, index, condition, not, wasGroup) {
     if (not) {
-        if (data.operator === "less" || data.operator === "greater" || data.operator === "greater_or_equal" || data.operator === "less_or_equal") {
-            result = "(" + result + ")";
-        }
-        result = result.slice(0, -1);
-        result += " " + condition + " " + parseRule(data) + ")";
-        return result;
+        return wasGroup === undefined ? result.slice(0, -1) + " " + condition + " " + parseRule(data) + ")" : result + " " + condition + " " + parseRule(data) + ")";
     }
     return result + " " + condition + " " + parseRule(data);
 }
@@ -501,7 +487,9 @@ function parseRight(data, result, index, condition, not) {
     var prevRes = parseData(data);
     if (not) {
         result = result.slice(0, -1);
-        if (data.not || data.rules.length === 1) return result + " " + condition + " " + prevRes + ")";
+        if (data.not || data.rules.length === 1) {
+            return result + " " + condition + " " + prevRes + ")";
+        }
 
         return result + " " + condition + " (" + prevRes + "))";
     }
@@ -530,7 +518,7 @@ function parseData(data) {
     result = createExpression(data);
     if (data.rules && data.rules.length > 1) {
         for (var i = 1; i < data.rules.length; i++) {
-            var arrP = [data.rules[i], result, i, data.condition, data.not];
+            var arrP = [data.rules[i], result, i, data.condition, data.not, data.rules[i - 1].condition];
             result = data.rules[i].condition ? parseRight.apply(undefined, arrP) : parseLeft.apply(undefined, arrP);
         }
     }
@@ -542,7 +530,7 @@ function parseRule(rule, not, length) {
     var operator = getOperatorSymbol(rule.operator);
     if (operator) {
         if (operator.isBasic) {
-            if (rule.type === "integer" && (rule.operator === "less" || rule.operator === "greater" || rule.operator === "greater_or_equal" || rule.operator === "less_or_equal")) {
+            if (rule.type === "integer" && isBasicOperator(rule.operator)) {
                 return "(" + rule.id + operator.text + rule.value + ")";
             }
             result = "(" + rule.id + operator.text + "\"" + rule.value + "\")";
@@ -561,6 +549,8 @@ function parseRule(rule, not, length) {
     }
     return "";
 }
+
+// ####### end expression builder ######
 
 function getOperatorSymbol(operator) {
     switch (operator) {

@@ -8,7 +8,7 @@
 *.xdt
 *.cache
 *.csproj
-Scripts/dist/*.js
+Scripts/dist/app.js
 Debug/
 node_modules/
 v14/
