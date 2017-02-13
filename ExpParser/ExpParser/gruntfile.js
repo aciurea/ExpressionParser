@@ -2,28 +2,20 @@
 module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
-        //clean: {
-        //    output: ["Scripts/test.js"]
-        //},
-        concat: {
-            options: {
-                sourceMap: false
-            },
-            dist: {
-                src: ["Scripts/app/segmentationBuilder.js", "Scripts/app/expressionParser.js", "Scripts/app/employee.js"],
-                dest: "Scripts/app/built.js"
-            }
-        },
         babel: {
             options: {
                 sourceMap: false,
                 presets: ["es2015"],
-                plugins: ["transform-es2015-modules-commonjs"]
+                plugins: ["transform-es2015-modules-amd"]
             },
             dist: {
-                files: {
-                    "Scripts/app/expressionParserEs2015.js": "Scripts/app/built.js"
-                }
+                files: [
+                {
+                    expand: true,
+                    cwd: "Scripts/app/src/",
+                    src: ["employee.js", "expressionParser.js", "segmentationBuilder.js", "employeeModule.js"],
+                    dest: "Scripts/app/dist/"
+                }]
             }
         },
         browserify: {
@@ -33,25 +25,36 @@ module.exports = function (grunt) {
                     ["babelify", { "presets": ["es2015"] }]]
                 },
                 files: {
-                    "Scripts/app/expParser.js": "Scripts/app/built.js"
+                    "Scripts/app/dist/app.js": ["Scripts/app/src/*.js"]
                 }
             }
         },
         uglify: {
             my_target: {
                 files: {
-                    "Scripts/app/expParser.min.js": "Scripts/app/expParser.js"
+                    "Scripts/app/expParser.min.js": "Scripts/app/built.js"
                 }
+            }
+        },
+        transpile: {
+            main: {
+                type: "cjs", // or "amd" or "yui"
+                files: [{
+                    expand: true,
+                    cwd: 'Scripts/app/src/',
+                    src: ['*.js'],
+                    dest: 'Scripts/app/tmp/'
+                }]
             }
         }
     });
-    //grunt.loadNpmTasks("grunt-contrib-clean");
-    grunt.loadNpmTasks("grunt-babel");
-    grunt.loadNpmTasks("grunt-contrib-uglify");
-    grunt.loadNpmTasks("grunt-contrib-concat");
+    //grunt.loadNpmTasks("grunt-babel");
+    //grunt.loadNpmTasks('grunt-es6-module-transpiler');
+    //grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-browserify");
 
-    grunt.registerTask("default", ["concat", "browserify"]);
-    //grunt.registerTask("babelify", ["babel"]);
-
+    grunt.registerTask("default", ["browserify"]);
+    //grunt.registerTask("default", ["concat", "babel", "browserify"]);
+    //grunt.registerTask("babelJs", ["babel"]);
+    //grunt.registerTask("browserifyJS", ["browserify"]);
 }
