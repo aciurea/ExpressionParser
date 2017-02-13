@@ -1,4 +1,6 @@
-﻿"use strict";
+﻿import {getOperator} from "./segmentationBuilder";
+"use strict";
+
 $(document).ready(function () {
     $("#btnExpressionParser").on("click", function () {
         index = 0;

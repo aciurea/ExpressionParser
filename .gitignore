@@ -1,5 +1,4 @@
 *.dll
-*.suo
 *.config
 *.map
 *.exe
@@ -9,6 +8,7 @@
 *.xdt
 *.cache
 *.csproj
+Scripts/dist/*.js
 Debug/
 node_modules/
 v14/
