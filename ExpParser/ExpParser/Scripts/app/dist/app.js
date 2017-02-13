@@ -62,21 +62,23 @@ var _segmentationBuilder = require("./segmentationBuilder");
 "use strict";
 
 $(document).ready(function () {
+    var index = 0;
     $("#btnExpressionParser").on("click", function () {
         index = 0;
-        var data = $("#txtExpression").val();
-        var result = analyzeCondition(data);
+        debugger;
+        var expression = $("#txtExpression").val();
+        var result = analyzeCondition(expression);
         console.log(result);
 
         $("#builder-basic").queryBuilder("setRules", result);
     });
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
-    var index = 1;
+    //var index = 1;
     function analyzeCondition(expression) {
         var couples = getCouples(expression);
         var groupedCouples = getGroupCouples(couples, 0);
         console.log(groupedCouples);
-        var result = buildObjectFromExpression(groupedCouples, expression, 0);
+        var result = buildObjectFromExpression(groupedCouples, expression);
 
         return result;
     }
@@ -108,7 +110,7 @@ $(document).ready(function () {
                     }
                 }
                 //no Groups, just normal rules
-                else if (!couple.isGroup) {
+                else {
                         var values = getDataFromSimpleExpression(couple, expression, index);
                         var _operator = getOperatorIndex(expression, couple.ClosePIndex);
                         //no not for the moment
@@ -284,20 +286,17 @@ $(document).ready(function () {
         }
         return { index: 4, operator: "OR" };
     }
-    function getCouples(condition) {
-        condition = condition.trim();
+    function getCouples(expression) {
+        expression = expression.trim();
         var indexOfCharInCondition = -1;
         var indexOfLastOpenP = 0;
         var dicPCouplesSource = [];
-        var couplesIndex = -1;
-        var coupleToCloseFounded = false;
-
         var _iteratorNormalCompletion4 = true;
         var _didIteratorError4 = false;
         var _iteratorError4 = undefined;
 
         try {
-            for (var _iterator4 = condition[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+            for (var _iterator4 = expression[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
                 var c = _step4.value;
 
 
@@ -310,7 +309,9 @@ $(document).ready(function () {
                     }
                     dicPCouplesSource.push({ OpenPIndex: indexOfCharInCondition, ClosePIndex: -1, isGroup: false });
                 } else if (c === ')') {
+                    var couplesIndex = -1;
                     couplesIndex = dicPCouplesSource.length;
+                    var coupleToCloseFounded = false;
                     coupleToCloseFounded = false;
                     while (couplesIndex > 0) {
                         if (dicPCouplesSource[couplesIndex - 1].ClosePIndex === -1) {
@@ -485,7 +486,7 @@ function checkParameters(data) {
     }
 }
 
-function parseLeft(data, result, condition, index, not) {
+function parseLeft(data, result, index, condition, not) {
     if (not) {
         if (data.operator === "less" || data.operator === "greater" || data.operator === "greater_or_equal" || data.operator === "less_or_equal") {
             result = "(" + result + ")";
@@ -529,11 +530,8 @@ function parseData(data) {
     result = createExpression(data);
     if (data.rules && data.rules.length > 1) {
         for (var i = 1; i < data.rules.length; i++) {
-            if (data.rules[i].condition) {
-                result = parseRight(data.rules[i], result, i, data.condition, data.not);
-            } else {
-                result = parseLeft(data.rules[i], result, data.condition, i, data.not);
-            }
+            var arrP = [data.rules[i], result, i, data.condition, data.not];
+            result = data.rules[i].condition ? parseRight.apply(undefined, arrP) : parseLeft.apply(undefined, arrP);
         }
     }
     return result;

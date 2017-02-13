@@ -142,7 +142,7 @@ function checkParameters(data) {
     }
 }
 
-function parseLeft(data, result, condition, index, not) {
+function parseLeft(data, result, index,condition, not) {
     if (not) {
         if ((data.operator === "less" || data.operator === "greater" || data.operator === "greater_or_equal" || data.operator === "less_or_equal")) {
             result = `(${result})`;
@@ -186,11 +186,8 @@ function parseData(data) {
     result = createExpression(data);
     if (data.rules && data.rules.length > 1) {
         for (let i = 1; i < data.rules.length; i++) {
-            if (data.rules[i].condition) {
-                result = parseRight(data.rules[i], result, i, data.condition, data.not);
-            } else {
-                result = parseLeft(data.rules[i], result, data.condition, i, data.not);
-            }
+            const arrP = [data.rules[i], result, i, data.condition, data.not];
+            result = data.rules[i].condition ?  parseRight(...arrP): parseLeft(...arrP);
         }
     }
     return result;
@@ -239,7 +236,7 @@ function getOperatorSymbol(operator) {
     return null;
 }
 
-export const getOperator = function (operatorSymbol) {
+export const getOperator = (operatorSymbol) => {
     switch (operatorSymbol) {
         case "=": return { text: "equal", isBasic: true };
         case "<>": return { text: "not_equal", isBasic: true };

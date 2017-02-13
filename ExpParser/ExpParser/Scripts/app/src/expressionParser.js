@@ -2,21 +2,23 @@
 "use strict";
 
 $(document).ready(function () {
+    var index = 0;
     $("#btnExpressionParser").on("click", function () {
         index = 0;
-        const data = $("#txtExpression").val();
-        const result = analyzeCondition(data);
+        debugger;
+        const expression = $("#txtExpression").val();
+        const result = analyzeCondition(expression);
         console.log(result);
 
         $("#builder-basic").queryBuilder("setRules", result);
     });
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
-    var index = 1;
+    //var index = 1;
     function analyzeCondition(expression) {
         const couples = getCouples(expression);
         const groupedCouples = getGroupCouples(couples, 0);
         console.log(groupedCouples);
-        const result = buildObjectFromExpression(groupedCouples, expression, 0);
+        const result = buildObjectFromExpression(groupedCouples, expression);
 
         return result;
     }
@@ -43,7 +45,7 @@ $(document).ready(function () {
                 }
             }
                 //no Groups, just normal rules
-            else if (!couple.isGroup) {
+            else {
                 const values = getDataFromSimpleExpression(couple, expression, index);
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
                 //no not for the moment
@@ -164,15 +166,12 @@ $(document).ready(function () {
         }
         return { index: 4, operator: "OR" };
     }
-    function getCouples(condition) {
-        condition = condition.trim();
-        var indexOfCharInCondition = -1;
-        var indexOfLastOpenP = 0;
-        var dicPCouplesSource = [];
-        var couplesIndex = -1;
-        var coupleToCloseFounded = false;
-
-        for (var c of condition) {
+    function getCouples(expression) {
+        expression = expression.trim();
+        let indexOfCharInCondition = -1;
+        let indexOfLastOpenP = 0;
+        let dicPCouplesSource = [];
+        for (let c of expression) {
 
             indexOfCharInCondition++;
             if (c === '(') {
@@ -184,7 +183,9 @@ $(document).ready(function () {
                 dicPCouplesSource.push({ OpenPIndex: indexOfCharInCondition, ClosePIndex: -1, isGroup: false });
             }
             else if (c === ')') {
+                let couplesIndex = -1;
                 couplesIndex = dicPCouplesSource.length;
+                let coupleToCloseFounded = false;
                 coupleToCloseFounded = false;
                 while (couplesIndex > 0) {
                     if (dicPCouplesSource[couplesIndex - 1].ClosePIndex === -1) {

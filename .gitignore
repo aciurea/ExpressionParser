@@ -12,3 +12,4 @@ Scripts/dist/*.js
 Debug/
 node_modules/
 v14/
+ExpParser.csproj.user
