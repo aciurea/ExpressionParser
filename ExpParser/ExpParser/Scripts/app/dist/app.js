@@ -15,7 +15,6 @@ $(document).ready(function () {
     });
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
     function analyzeCondition(expression) {
-        debugger;
         expression = expression.replace(/ /g, '');
         var couples = getCouples(expression);
         var groupedCouples = getGroupCouples(couples, 0);
@@ -40,7 +39,6 @@ $(document).ready(function () {
             for (var _iterator = couples[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                 var couple = _step.value;
 
-                debugger;
                 //if is group, do it recursively 
                 if (couple.isGroup) {
                     var isNot = checkNotOperator(couple, expression, index);
@@ -65,8 +63,8 @@ $(document).ready(function () {
                         if (!result) {
                             result = { condition: _operator.operator, not: _isNot.not, rules: [] };
                         }
-                        result.rules.push(values);
-                        index = couple.ClosePIndex + _operator.index;
+                        result.rules.push(values.values);
+                        index = couple.ClosePIndex + _operator.index + values.index;
                     }
             }
         } catch (err) {
@@ -192,14 +190,16 @@ $(document).ready(function () {
     function getDataFromSimpleExpression(couple, expression, index) {
         var expr = expression.toLowerCase();
         var compareValue = expr.substring(index, couple.OpenPIndex).trim();
+        var res = { values: '', index: 0 };
         if (compareValue.indexOf("exists") === 1) {
-            index += 1;
-            return getValuesFromExistsExp(couple, expression);
+            res.values = getValuesFromExistsExp(couple, expression);
+            res.index = 1;
+            return res;
         }
         if (compareValue.indexOf("exists") === 0) {
-            return getValuesFromExistsExp(couple, expression);
+            return { values: getValuesFromExistsExp(couple, expression), index: 0 };
         } else {
-            return getValuesFromNormalExp(couple, expression, index);
+            return { values: getValuesFromNormalExp(couple, expression, index), index: 0 };
         }
     }
     function getCompareSign(data, fromIndex, couple) {
