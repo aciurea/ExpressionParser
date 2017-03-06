@@ -1,71 +1,12 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
 
-var _employeeModule = require("./employeeModule");
-
-(function () {
-    console.log(_employeeModule.gigel);
-    var emp = new _employeeModule.Employee("Vasilica");
-    var d = emp.doWork();
-    console.log(d);
-})();
-
-},{"./employeeModule":2}],2:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Employee = function () {
-    function Employee(name) {
-        _classCallCheck(this, Employee);
-
-        this._name = name;
-    }
-
-    _createClass(Employee, [{
-        key: "doWork",
-        value: function doWork() {
-            return this._name + " is working";
-        }
-    }, {
-        key: "name",
-        get: function get() {
-            return this._name;
-        }
-    }]);
-
-    return Employee;
-}();
-
-exports.Employee = Employee;
-
-
-var gigel = {
-    "gigel": 1,
-    "ionel": 2,
-    "vasilica": 3
-};
-exports.gigel = gigel;
-var d1 = exports.d1 = 1321321321;
-
-},{}],3:[function(require,module,exports){
-"use strict";
-
 var _segmentationBuilder = require("./segmentationBuilder");
 
 "use strict";
 
 $(document).ready(function () {
-    var index = 0;
     $("#btnExpressionParser").on("click", function () {
-        index = 0;
-        debugger;
         var expression = $("#txtExpression").val();
         var result = analyzeCondition(expression);
         console.log(result);
@@ -73,17 +14,19 @@ $(document).ready(function () {
         $("#builder-basic").queryBuilder("setRules", result);
     });
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
-    //var index = 1;
     function analyzeCondition(expression) {
+        debugger;
+        expression = expression.replace(/ /g, '');
         var couples = getCouples(expression);
         var groupedCouples = getGroupCouples(couples, 0);
         console.log(groupedCouples);
-        var result = buildObjectFromExpression(groupedCouples, expression);
+        var index = 0;
+        var result = buildObjectFromExpression(groupedCouples, expression, index);
 
         return result;
     }
 
-    function buildObjectFromExpression(couples, expression) {
+    function buildObjectFromExpression(couples, expression, index) {
         var result = void 0;
         if (!(couples instanceof Array)) {
             couples = new Array(couples);
@@ -97,25 +40,30 @@ $(document).ready(function () {
             for (var _iterator = couples[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                 var couple = _step.value;
 
-
+                debugger;
                 //if is group, do it recursively 
                 if (couple.isGroup) {
-                    var prevRes = buildObjectFromExpression(couple, expression);
+                    var isNot = checkNotOperator(couple, expression, index);
+                    index += isNot.not ? isNot.index : 0;
+
+                    var prevRes = buildObjectFromExpression(couple, expression, index);
                     var operator = getOperatorIndex(expression, couple.ClosePIndex);
                     index += 1;
                     if (!result) {
-                        result = { condition: operator.operator, not: false, rules: new Array(prevRes) };
+                        result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
                     } else {
                         result.rules.push(prevRes);
                     }
                 }
                 //no Groups, just normal rules
                 else {
+                        var _isNot = checkNotOperator(couple, expression, index);
+                        index += _isNot ? _isNot.index : 0;
                         var values = getDataFromSimpleExpression(couple, expression, index);
                         var _operator = getOperatorIndex(expression, couple.ClosePIndex);
                         //no not for the moment
                         if (!result) {
-                            result = { condition: _operator.operator, not: false, rules: [] };
+                            result = { condition: _operator.operator, not: _isNot.not, rules: [] };
                         }
                         result.rules.push(values);
                         index = couple.ClosePIndex + _operator.index;
@@ -139,15 +87,29 @@ $(document).ready(function () {
         return result;
     }
 
-    function getNotIndex(expression, fromIndex) {
-        var notIndex = expression.indexOf("NOT", fromIndex);
-        if (notIndex === -1) {
-            notIndex = expression.indexOf("not", fromIndex);
-            if (notIndex === -1) {
-                notIndex = expression.indexOf("Not", fromIndex);
-            }
+    //function getNotIndex(expression, fromIndex) {
+    //    var notIndex = expression.indexOf("NOT", fromIndex);
+    //    if (notIndex === -1) {
+    //        notIndex = expression.indexOf("not", fromIndex);
+    //        if (notIndex === -1) {
+    //            notIndex = expression.indexOf("Not", fromIndex);
+    //        }
+    //    }
+    //    return notIndex;
+    //}
+    function checkNotOperator(couple, expression, index) {
+        var notObj = { index: 0, not: false };
+        expression = expression.substring(index).toLowerCase();
+        var i = expression.indexOf('not');
+        if (i === 1) {
+            notObj.index += 4;
+            notObj.not = true;
         }
-        return notIndex;
+        if (i === 0) {
+            notObj.not = true;
+            notObj.index += 3;
+        }
+        return notObj;
     }
 
     function getGroupCouples(couples, lastIndexRule, isInGroup) {
@@ -228,13 +190,13 @@ $(document).ready(function () {
         return insideCouples;
     }
     function getDataFromSimpleExpression(couple, expression, index) {
-        var compareValue = expression.substring(index, couple.OpenPIndex).trim();
-        if (compareValue.indexOf("(Exists") === 0) {
-            console.log("I've been here.....");
+        var expr = expression.toLowerCase();
+        var compareValue = expr.substring(index, couple.OpenPIndex).trim();
+        if (compareValue.indexOf("exists") === 1) {
             index += 1;
             return getValuesFromExistsExp(couple, expression);
         }
-        if (compareValue.indexOf("Exists") === 0) {
+        if (compareValue.indexOf("exists") === 0) {
             return getValuesFromExistsExp(couple, expression);
         } else {
             return getValuesFromNormalExp(couple, expression, index);
@@ -280,11 +242,11 @@ $(document).ready(function () {
         };
     }
     function getOperatorIndex(data, fromIndex) {
-        var index = data.indexOf("OR", fromIndex);
+        var index = data.indexOf("or", fromIndex);
         if (index === -1 || index - fromIndex > 5) {
-            return { index: 5, operator: "AND" };
+            return { index: 3, operator: "AND" };
         }
-        return { index: 4, operator: "OR" };
+        return { index: 2, operator: "OR" };
     }
     function getCouples(expression) {
         expression = expression.trim();
@@ -346,7 +308,7 @@ $(document).ready(function () {
     }
 });
 
-},{"./segmentationBuilder":4}],4:[function(require,module,exports){
+},{"./segmentationBuilder":2}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -617,4 +579,4 @@ var getOperator = exports.getOperator = function getOperator(operatorSymbol) {
     return null;
 };
 
-},{}]},{},[1,2,3,4]);
+},{}]},{},[1,2]);

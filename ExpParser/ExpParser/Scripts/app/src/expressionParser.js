@@ -2,10 +2,7 @@
 "use strict";
 
 $(document).ready(function () {
-    var index = 0;
     $("#btnExpressionParser").on("click", function () {
-        index = 0;
-        debugger;
         const expression = $("#txtExpression").val();
         const result = analyzeCondition(expression);
         console.log(result);
@@ -13,44 +10,47 @@ $(document).ready(function () {
         $("#builder-basic").queryBuilder("setRules", result);
     });
     var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
-    //var index = 1;
     function analyzeCondition(expression) {
+        expression = expression.replace(/ /g,'');
         const couples = getCouples(expression);
         const groupedCouples = getGroupCouples(couples, 0);
         console.log(groupedCouples);
-        const result = buildObjectFromExpression(groupedCouples, expression);
+        let index = 0;
+        const result = buildObjectFromExpression(groupedCouples, expression, index);
 
         return result;
     }
 
-
-
-    function buildObjectFromExpression(couples, expression) {
+    function buildObjectFromExpression(couples, expression, index) {
         let result;
         if (!(couples instanceof Array)) {
             couples = new Array(couples);
             couples = couples[0].couples;
         }
         for (let couple of couples) {
-
         //if is group, do it recursively 
             if (couple.isGroup) {
-                const prevRes = buildObjectFromExpression(couple, expression);
+                const isNot = checkNotOperator(couple, expression, index);
+                index += isNot.not? isNot.index : 0;
+
+                const prevRes = buildObjectFromExpression(couple, expression, index);
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
                 index += 1;
                 if (!result) {
-                    result = { condition: operator.operator, not: false, rules: new Array(prevRes) };
+                    result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
                 } else {
                     result.rules.push(prevRes);
                 }
             }
                 //no Groups, just normal rules
             else {
+                const isNot = checkNotOperator(couple, expression, index);
+                index += isNot ? isNot.index : 0;
                 const values = getDataFromSimpleExpression(couple, expression, index);
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
                 //no not for the moment
                 if (!result) {
-                    result = { condition: operator.operator, not: false, rules: [] }
+                    result = { condition: operator.operator, not: isNot.not, rules: [] }
                 }
                 result.rules.push(values);
                 index = couple.ClosePIndex + operator.index;
@@ -59,17 +59,30 @@ $(document).ready(function () {
         return result;
     }
 
-    function getNotIndex(expression, fromIndex) {
-        var notIndex = expression.indexOf("NOT", fromIndex);
-        if (notIndex === -1) {
-            notIndex = expression.indexOf("not", fromIndex);
-            if (notIndex === -1) {
-                notIndex = expression.indexOf("Not", fromIndex);
-            }
+    //function getNotIndex(expression, fromIndex) {
+    //    var notIndex = expression.indexOf("NOT", fromIndex);
+    //    if (notIndex === -1) {
+    //        notIndex = expression.indexOf("not", fromIndex);
+    //        if (notIndex === -1) {
+    //            notIndex = expression.indexOf("Not", fromIndex);
+    //        }
+    //    }
+    //    return notIndex;
+    //}
+    function checkNotOperator(couple, expression, index){
+        let notObj ={index:0, not:false};
+        expression = expression.substring(index).toLowerCase();
+        const i = expression.indexOf('not');
+        if(i === 1){
+            notObj.index += 4;
+            notObj.not = true;
         }
-        return notIndex;
+        if(i === 0){
+            notObj.not = true; 
+            notObj.index +=3
+        }       
+        return notObj;
     }
-
 
     function getGroupCouples(couples, lastIndexRule, isInGroup) {
         const groupedCouples = [];
@@ -109,13 +122,13 @@ $(document).ready(function () {
         return insideCouples;
     }
     function getDataFromSimpleExpression(couple, expression, index) {
-        const compareValue = expression.substring(index, couple.OpenPIndex).trim();
-        if (compareValue.indexOf("(Exists") === 0) {
-            console.log(`I've been here.....`);
+        const expr = expression.toLowerCase();
+        const compareValue = expr.substring(index, couple.OpenPIndex).trim();
+        if (compareValue.indexOf("exists") === 1) {
             index += 1;
             return getValuesFromExistsExp(couple, expression);
         }
-        if (compareValue.indexOf("Exists") === 0) {
+        if (compareValue.indexOf("exists") === 0) {
             return getValuesFromExistsExp(couple, expression);
         }
         else { return getValuesFromNormalExp(couple, expression, index); }
@@ -160,11 +173,11 @@ $(document).ready(function () {
         }
     }
     function getOperatorIndex(data, fromIndex) {
-        const index = data.indexOf("OR", fromIndex);
+        const index = data.indexOf("or", fromIndex);
         if (index === -1 || index - fromIndex > 5) {
-            return { index: 5, operator: "AND" };
+            return { index: 3, operator: "AND" };
         }
-        return { index: 4, operator: "OR" };
+        return { index: 2, operator: "OR" };
     }
     function getCouples(expression) {
         expression = expression.trim();

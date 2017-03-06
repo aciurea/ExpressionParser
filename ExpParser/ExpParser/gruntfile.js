@@ -7,7 +7,8 @@ module.exports = function (grunt) {
                 options: {
                     debug: true,
                     transform: [
-                    ["babelify", { "presets": ["es2015"] }]]
+                                    ["babelify", { presets: ["es2015"] }]
+                    ]
                 },
                 files: {
                     "Scripts/app/dist/app.js": ["Scripts/app/src/*.js"]
