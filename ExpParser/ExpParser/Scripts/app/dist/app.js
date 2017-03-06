@@ -85,33 +85,21 @@ $(document).ready(function () {
         return result;
     }
 
-    //function getNotIndex(expression, fromIndex) {
-    //    var notIndex = expression.indexOf("NOT", fromIndex);
-    //    if (notIndex === -1) {
-    //        notIndex = expression.indexOf("not", fromIndex);
-    //        if (notIndex === -1) {
-    //            notIndex = expression.indexOf("Not", fromIndex);
-    //        }
-    //    }
-    //    return notIndex;
-    //}
     function checkNotOperator(couple, expression, index) {
         var notObj = { index: 0, not: false };
         expression = expression.substring(index).toLowerCase();
         var i = expression.indexOf('not');
-        if (i === 1) {
-            notObj.index += 4;
+        if (i === 1 || i === 0) {
+            notObj.index += 4 + i;
             notObj.not = true;
         }
-        if (i === 0) {
-            notObj.not = true;
-            notObj.index += 3;
-        }
+
         return notObj;
     }
 
     function getGroupCouples(couples, lastIndexRule, isInGroup) {
         var groupedCouples = [];
+
         var _iteratorNormalCompletion2 = true;
         var _didIteratorError2 = false;
         var _iteratorError2 = undefined;
@@ -158,8 +146,10 @@ $(document).ready(function () {
 
         return groupedCouples;
     }
+
     function getCouplesFromGroup(couples, couple) {
         var insideCouples = [];
+
         var _iteratorNormalCompletion3 = true;
         var _didIteratorError3 = false;
         var _iteratorError3 = undefined;
@@ -187,24 +177,31 @@ $(document).ready(function () {
 
         return insideCouples;
     }
+
     function getDataFromSimpleExpression(couple, expression, index) {
         var expr = expression.toLowerCase();
-        var compareValue = expr.substring(index, couple.OpenPIndex).trim();
-        var res = { values: '', index: 0 };
+        var compareValue = expr.substring(index, couple.OpenPIndex);
+        var res = { values: null, index: 0 };
+
         if (compareValue.indexOf("exists") === 1) {
             res.values = getValuesFromExistsExp(couple, expression);
             res.index = 1;
             return res;
         }
         if (compareValue.indexOf("exists") === 0) {
-            return { values: getValuesFromExistsExp(couple, expression), index: 0 };
+            res.values = getValuesFromExistsExp(couple, expression);
+            res.index = 0;
+            return res;
         } else {
-            return { values: getValuesFromNormalExp(couple, expression, index), index: 0 };
+            res.values = getValuesFromNormalExp(couple, expression, index);
+            res.index = 0;return res;
         }
     }
+
     function getCompareSign(data, fromIndex, couple) {
         var expression = data.slice(couple.OpenPIndex, couple.ClosePIndex);
-        var opr;
+        var opr = void 0;
+
         operators.some(function (op) {
             var o = expression.indexOf(op);
             if (o !== -1) {
@@ -213,11 +210,13 @@ $(document).ready(function () {
             return opr;
         });
         var currentOpIndex = data.indexOf(opr, fromIndex);
+
         return { operator: opr, index: currentOpIndex };
     }
+
     function getValuesFromNormalExp(couple, expression, index) {
         var res = getCompareSign(expression, index, couple);
-        var parameter = expression.substring(couple.OpenPIndex + 1, res.index).trim();
+        var parameter = expression.substring(couple.OpenPIndex + 1, res.index);
         var valueToCompareTo = expression.substring(res.index + res.operator.length + 1, couple.ClosePIndex - 1);
         var op = (0, _segmentationBuilder.getOperator)(res.operator);
         var result = {
@@ -226,10 +225,11 @@ $(document).ready(function () {
             id: parameter,
             input: "text",
             type: "string",
-            value: valueToCompareTo.trim()
+            value: valueToCompareTo
         };
         return result;
     }
+
     function getValuesFromExistsExp(couple, expression) {
         var value = expression.substring(couple.OpenPIndex + 1, couple.ClosePIndex);
         return {
@@ -241,15 +241,21 @@ $(document).ready(function () {
             value: null
         };
     }
+
     function getOperatorIndex(data, fromIndex) {
-        var index = data.indexOf("or", fromIndex);
-        if (index === -1 || index - fromIndex > 5) {
-            return { index: 3, operator: "AND" };
+        data = data.substring(fromIndex).toLowerCase();
+        var index = data.indexOf("or");
+
+        if (index === 0 || index === 1) {
+            return { index: 2 + index, operator: "OR" };
         }
-        return { index: 2, operator: "OR" };
+        index = data.indexOf('and');
+
+        return { index: 3 + index, operator: "AND" };
     }
+
     function getCouples(expression) {
-        expression = expression.trim();
+        expression = expression;
         var indexOfCharInCondition = -1;
         var indexOfLastOpenP = 0;
         var dicPCouplesSource = [];

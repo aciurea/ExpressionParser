@@ -60,17 +60,14 @@ $(document).ready(function () {
     }
 
     function checkNotOperator(couple, expression, index){
-        let notObj ={index:0, not:false};
+        let notObj = {index:0, not:false};
         expression = expression.substring(index).toLowerCase();
         const i = expression.indexOf('not');
-        if(i === 1){
-            notObj.index += 4;
+        if(i === 1 || i === 0){
+            notObj.index += 4 + i;
             notObj.not = true;
         }
-        if(i === 0){
-            notObj.not = true; 
-            notObj.index +=3
-        }       
+            
         return notObj;
     }
 
@@ -181,11 +178,15 @@ $(document).ready(function () {
     }
 
     function getOperatorIndex(data, fromIndex) {
-        const index = data.indexOf("or", fromIndex);
-        if (index === -1 || index - fromIndex > 5) {
-            return { index: 3, operator: "AND" };
+        data = data.substring(fromIndex).toLowerCase();
+        let index = data.indexOf("or");
+        
+        if (index === 0 || index ===1) {
+            return { index: 2 + index, operator: "OR" };
         }
-        return { index: 2, operator: "OR" };
+        index = data.indexOf('and');
+
+        return { index: 3 + index, operator: "AND" };
     }
 
     function getCouples(expression) {
