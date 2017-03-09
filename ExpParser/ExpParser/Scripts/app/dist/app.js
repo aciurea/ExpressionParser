@@ -329,7 +329,6 @@ $(document).ready(function () {
 
     $("#btnParse").on("click", function () {
         var expressionData = $("#builder-basic").queryBuilder("getRules");
-        console.log('Expression parsed is: ', expressionData);
         if ($.isEmptyObject(expressionData)) return;
         var parsedExpression = parseData(expressionData);
         $("#txtExpression").val(parsedExpression);
@@ -339,6 +338,8 @@ $(document).ready(function () {
         $("i.glyphicon").toggleClass("glyphicon-menu-up").toggleClass("glyphicon-menu-down");
     });
 });
+
+//#### Query Builder Settings
 function setFilters() {
     $.getJSON("./filters.json", function (data) {
         options.filters = data;
@@ -356,168 +357,56 @@ var options = {
     conditions: ["AND", "OR"],
     default_condition: "AND"
 };
-function AddValues(data) {
-    return {
-        field: data.field,
-        id: data.id,
-        input: data.input,
-        operator: data.operator,
-        type: data.type,
-        value: data.value
-    };
-}
-
-// ######## beautify expression when it comes from server
-function BeautifyLeft(data, index, result) {
-    var rules = AddValues(data);
-    return result.rules.push(rules);
-}
-function BeautifyRight(data, index, result) {
-    var rules = [];
-    var prevRest = BeautifyExpression(data);
-    rules.push(result);
-    rules.push(prevRest);
-    return result = { data: data.condition, not: data.not, rules: rules };
-}
-function createJson(data, result) {
-    if (data.rules && data.rules[0].condition) {
-        var prevRes = BeautifyExpression(data.rules[0]);
-        return result === undefined ? prevRes : result;
-    } else {
-        var rules = [];
-        var isSimpleGroup = data.rules[0] && data.rules[1] && !data.rules[1].condition;
-
-        rules.push(AddValues(data.rules[0]));
-        result = isSimpleGroup ? { condition: data.condition, not: data.not, rules: rules } : result.rules.push(rules);
-    }
-    return result;
-}
-function BeautifyExpression(data, result) {
-    result = createJson(data, result);
-    if (data.rules.length > 1) {
-        for (var i = 1; i < data.rules.length; i++) {
-            if (data.rules[i].condition) {
-                result = BeautifyRight(data.rules[i], i, result);
-            } else {
-                result = BeautifyLeft(data.rules[i], i, result);
-            }
-        }
-    }
-    return result;
-}
-function getData(data) {
-    if (data.rules && data.rules[0].condition) {
-        getData(data.rules[0]);
-    }
-    if (data.rules && data.rules[0].condition && data.rules[1]) {
-        getData(data.rules[1]);
-    } else if (data.rules) {
-        checkParameters(data.rules[0]);
-    } else {
-        checkParameters(data);
-    }
-    if (data.rules && data.rules.length > 1 && !data.rules[0].condition) {
-        for (var i = 0; i < data.rules.length; i++) {
-            if (data.rules[i].condition) {
-                getData(data.rules[i]);
-            } else {
-                checkParameters(data.rules[i]);
-            }
-        }
-    }
-}
-function checkParameters(data) {
-    var isParameter = options.filters.some(function (val) {
-        return val.id === data.id;
-    });
-    if (!isParameter) {
-        options.filters.push({ id: data.id, label: data.field, type: data.type, size: 30 });
-        $("#builder-basic").queryBuilder("destroy");
-        $("#builder-basic").queryBuilder(options);
-    }
-}
-
-// ##### end beautify expression
-
+//##### End Query Builder Settings
 
 // ####### expression builder ##########
-
-function isBasicOperator(operator) {
-    return operator === "less" || operator === "greater" || operator === "greater_or_equal" || operator === "less_or_equal";
-}
-function parseLeft(data, result, index, condition, not, wasGroup) {
-    if (not) {
-        return wasGroup === undefined ? result.slice(0, -1) + " " + condition + " " + parseRule(data) + ")" : result + " " + condition + " " + parseRule(data) + ")";
-    }
-    return result + " " + condition + " " + parseRule(data);
-}
-function parseRight(data, result, index, condition, not) {
-    var prevRes = parseData(data);
-    if (not) {
-        result = result.slice(0, -1);
-        if (data.not || data.rules.length === 1) {
-            return result + " " + condition + " " + prevRes + ")";
-        }
-
-        return result + " " + condition + " (" + prevRes + "))";
-    }
-    if (data.not || data.rules.length === 1) {
-        return result + " " + condition + " " + prevRes;
-    }
-    prevRes = " " + condition + " (" + prevRes + ")";
-    return result + prevRes;
-}
 function createExpression(data) {
     if (data.rules && data.rules[0].condition) {
-        if (data.not) {
-            return "NOT (" + parseData(data.rules[0]) + ")";
-        }
-        var result = "(" + parseData(data.rules[0]) + ")";
-        if (result.indexOf("(NOT") === 0 || result.indexOf("((") === 0) result = result.slice(1, -1);
-        return result;
+        var _result = parseData(data.rules[0]);
+
+        _result = data.not ? "NOT (" + _result + ")" : "(" + _result + ")";
+        return _result;
     }
-    if (data.not) {
-        return "NOT " + parseRule(data.rules[0], data.not, data.rules.length);
-    }
-    return parseRule(data.rules[0], data.not);
+    var result = parseRule(data.rules[0], data.not);
+
+    result = data.not ? "NOT " + result : result;
+    return result;
 }
 function parseData(data) {
     var result = void 0;
     result = createExpression(data);
     if (data.rules && data.rules.length > 1) {
         for (var i = 1; i < data.rules.length; i++) {
-            var arrP = [data.rules[i], result, i, data.condition, data.not, data.rules[i - 1].condition];
-            result = data.rules[i].condition ? parseRight.apply(undefined, arrP) : parseLeft.apply(undefined, arrP);
+            var arrP = [data.rules[i], result, data.condition];
+
+            result = data.rules[i].condition ? parseRightSide.apply(undefined, arrP) : parseLeftSide.apply(undefined, arrP);
         }
     }
     return result;
 }
-
-function parseRule(rule, not, length) {
-    var result;
+function parseRightSide(data, result, condition) {
+    return result + " " + condition + " (" + parseData(data) + ")";
+}
+function parseLeftSide(data, result, condition) {
+    return result + " " + condition + " " + parseRule(data);
+}
+function parseRule(rule, not) {
     var operator = getOperatorSymbol(rule.operator);
+
     if (operator) {
         if (operator.isBasic) {
             if (rule.type === "integer" && isBasicOperator(rule.operator)) {
                 return "(" + rule.id + operator.text + rule.value + ")";
             }
-            result = "(" + rule.id + operator.text + "\"" + rule.value + "\")";
-            if (not) {
-                if (length === 1) {
-                    return result;
-                }
-                return "(" + result + ")";
-            }
-            return result;
-        }
-        if (not) {
-            return "(" + operator.text + "(" + rule.id + "))";
+            return "(" + rule.id + operator.text + "\"" + rule.value + "\")";
         }
         return operator.text + "(" + rule.id + ")";
     }
-    return "";
+    return undefined;
 }
-
+function isBasicOperator(operator) {
+    return operator === "less" || operator === "greater" || operator === "greater_or_equal" || operator === "less_or_equal";
+}
 // ####### end expression builder ######
 
 function getOperatorSymbol(operator) {
@@ -548,7 +437,7 @@ function getOperatorSymbol(operator) {
             console.log("Not implemented operator: " + operator);
     }
 
-    return null;
+    return undefined;
 }
 
 var getOperator = exports.getOperator = function getOperator(operatorSymbol) {
@@ -582,7 +471,7 @@ var getOperator = exports.getOperator = function getOperator(operatorSymbol) {
             console.log("Not implemented operator: " + operatorSymbol);
     }
 
-    return null;
+    return undefined;
 };
 
 },{}]},{},[1,2]);
