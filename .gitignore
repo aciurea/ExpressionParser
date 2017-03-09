@@ -13,6 +13,4 @@ Debug/
 node_modules/
 v14/
 ExpParser.csproj.user
-.vs/ExpParser/v14
-.vs/config/applicationhost.config
-ExpParser/ExpParser/obj/
+ExpParser/ExpParser/Scripts/app/dist/app.js
