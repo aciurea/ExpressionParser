@@ -18,7 +18,6 @@ $(document).ready(function () {
         expression = expression.replace(/ /g, '');
         var couples = getCouples(expression);
         var groupedCouples = getGroupCouples(couples, 0);
-        console.log(groupedCouples);
         var index = 0;
         var result = buildObjectFromExpression(groupedCouples, expression, index);
 
@@ -39,29 +38,32 @@ $(document).ready(function () {
             for (var _iterator = couples[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                 var couple = _step.value;
 
+                debugger;
                 //if is group, do it recursively 
                 if (couple.isGroup) {
                     var isNot = checkNotOperator(couple, expression, index);
-                    index += isNot.not ? isNot.index : 0;
+                    index += isNot.not ? isNot.index : 1;
 
                     var prevRes = buildObjectFromExpression(couple, expression, index);
                     var operator = getOperatorIndex(expression, couple.ClosePIndex);
-                    index += 1;
+
+                    prevRes.not = isNot.not;
                     if (!result) {
-                        result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
+                        var _isNot = checkNotOperator(couple, expression, index);
+                        result = { condition: operator.operator, not: _isNot.not, rules: new Array(prevRes) };
                     } else {
                         result.rules.push(prevRes);
                     }
                 }
                 //no Groups, just normal rules
                 else {
-                        var _isNot = checkNotOperator(couple, expression, index);
-                        index += _isNot ? _isNot.index : 0;
+                        var _isNot2 = checkNotOperator(couple, expression, index);
+                        index += _isNot2 ? _isNot2.index : 0;
                         var values = getDataFromSimpleExpression(couple, expression, index);
                         var _operator = getOperatorIndex(expression, couple.ClosePIndex);
                         //no not for the moment
                         if (!result) {
-                            result = { condition: _operator.operator, not: _isNot.not, rules: [] };
+                            result = { condition: _operator.operator, not: _isNot2.not, rules: [] };
                         }
                         result.rules.push(values.values);
                         index = couple.ClosePIndex + _operator.index + values.index;
@@ -90,7 +92,7 @@ $(document).ready(function () {
         expression = expression.substring(index).toLowerCase();
         var i = expression.indexOf('not');
         if (i === 1 || i === 0) {
-            notObj.index += 4 + i;
+            notObj.index += 3 + i;
             notObj.not = true;
         }
 
@@ -183,11 +185,6 @@ $(document).ready(function () {
         var compareValue = expr.substring(index, couple.OpenPIndex);
         var res = { values: null, index: 0 };
 
-        if (compareValue.indexOf("exists") === 1) {
-            res.values = getValuesFromExistsExp(couple, expression);
-            res.index = 1;
-            return res;
-        }
         if (compareValue.indexOf("exists") === 0) {
             res.values = getValuesFromExistsExp(couple, expression);
             res.index = 0;
