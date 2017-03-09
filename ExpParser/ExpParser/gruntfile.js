@@ -5,6 +5,7 @@ module.exports = function (grunt) {
         browserify: {
             dist: {
                 options: {
+                    debug: true,
                     transform: [
                     ["babelify", { "presets": ["es2015"] }]]
                 },
@@ -23,5 +24,5 @@ module.exports = function (grunt) {
     });
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-uglify");
-    grunt.registerTask("default", ["browserify", "uglify"]);
+    grunt.registerTask("default", ["browserify"]);
 }
