@@ -32,7 +32,6 @@ $(document).ready(function () {
         for (let couple of couples) {
         //if is group, do it recursively 
             if (couple.isGroup) {              
-
                 const isNot = checkNotOperator(couple, expression, index);
                 index += isNot.not? isNot.index + 1: 1;
     
@@ -118,14 +117,8 @@ $(document).ready(function () {
         const expr = expression.toLowerCase();
         const compareValue = expr.substring(index, couple.OpenPIndex);
 
-        if (compareValue.indexOf("exists") === 0) {
-            const result = getValuesFromExistsExp(couple, expression); 
-            return result;
-        }
-        else {
-            const result = getValuesFromNormalExp(couple, expression, index);
-            return result;
-        }
+        return compareValue.indexOf("exists") === 0 ?getValuesFromExistsExp(couple, expression):
+            getValuesFromNormalExp(couple, expression, index);
     }
 
     function getCompareSign(data, fromIndex, couple) {
