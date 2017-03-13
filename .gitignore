@@ -14,3 +14,4 @@ node_modules/
 v14/
 ExpParser.csproj.user
 ExpParser/ExpParser/Scripts/app/dist/app.js
+ExpParser/ExpParser/obj/Debug/

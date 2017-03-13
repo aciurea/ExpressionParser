@@ -2,10 +2,11 @@
 "use strict";
 
 $(document).ready(function () {
+    let objIndex = { length: 0 };
     $("#btnExpressionParser").on("click", function () {
+        objIndex.length = 0;
         const expression = $("#txtExpression").val();
         const result = analyzeCondition(expression);
-        console.log(result);
 
         $("#builder-basic").queryBuilder("setRules", result);
     });
@@ -15,25 +16,27 @@ $(document).ready(function () {
         const couples = getCouples(expression);
         const groupedCouples = getGroupCouples(couples, 0);
         let index = 0;
-        const result = buildObjectFromExpression(groupedCouples, expression, index);
+        const result = buildObjectFromExpression(groupedCouples, expression, index, false);
 
         return result;
     }
-
-    function buildObjectFromExpression(couples, expression, index) {
+    
+    function buildObjectFromExpression(couples, expression, index, isRcv) {
         let result;
         if (!(couples instanceof Array)) {
             couples = new Array(couples);
             couples = couples[0].couples;
         }
-        for (let couple of couples) {
-            debugger;
-        //if is group, do it recursively 
-            if (couple.isGroup) {
-                const isNot = checkNotOperator(couple, expression, index);
-                index += isNot.not? isNot.index : 1;
 
-                const prevRes = buildObjectFromExpression(couple, expression, index);
+        for (let couple of couples) {
+
+        //if is group, do it recursively 
+            if (couple.isGroup) {              
+
+                const isNot = checkNotOperator(couple, expression, index);
+                index += isNot.not? isNot.index + 1: 1;
+    
+                const prevRes = buildObjectFromExpression(couple, expression, index, true);
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
                 
                 prevRes.not = isNot.not;
@@ -46,31 +49,31 @@ $(document).ready(function () {
             }
                 //no Groups, just normal rules
             else {
+                if(index < objIndex.length){
+                    index = isRcv ? objIndex.length + 1: objIndex.length;
+                }
+
                 const isNot = checkNotOperator(couple, expression, index);
                 index += isNot ? isNot.index : 0;
                 const values = getDataFromSimpleExpression(couple, expression, index);
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
-                //no not for the moment
+
                 if (!result) {
                     result = { condition: operator.operator, not: isNot.not, rules: [] }
                 }
-                result.rules.push(values.values);
-                index = couple.ClosePIndex + operator.index + values.index;
+                result.rules.push(values);
+                objIndex.length = index = couple.ClosePIndex + operator.index;
             }
         }
         return result;
     }
 
     function checkNotOperator(couple, expression, index){
-        let notObj = {index:0, not:false};
         expression = expression.substring(index).toLowerCase();
+       
         const i = expression.indexOf('not');
-        if(i === 1 || i === 0){
-            notObj.index += 3 + i;
-            notObj.not = true;
-        }
-            
-        return notObj;
+
+        return i === 0 ? { index: 3, not:true} : {index:0, not:false};
     }
 
     function getGroupCouples(couples, lastIndexRule, isInGroup) {
@@ -117,16 +120,14 @@ $(document).ready(function () {
     function getDataFromSimpleExpression(couple, expression, index) {
         const expr = expression.toLowerCase();
         const compareValue = expr.substring(index, couple.OpenPIndex);
-        const res = {values:null, index:0};
 
         if (compareValue.indexOf("exists") === 0) {
-            res.values = getValuesFromExistsExp(couple, expression); 
-            res.index = 0;
-            return res;
+            const result = getValuesFromExistsExp(couple, expression); 
+            return result;
         }
         else {
-            res.values=getValuesFromNormalExp(couple, expression, index);
-            res.index=0; return res;
+            const result = getValuesFromNormalExp(couple, expression, index);
+            return result;
         }
     }
 
