@@ -14,7 +14,7 @@ $(document).ready(function () {
     const operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
     
     function analyzeCondition(expression) {
-        expression = expression.replace(/ /g,'');
+        expression = expression.replace(/\s/g, '');
         const couples = getCouples(expression);
         const groupedCouples = getGroupCouples(couples, 0);
         let index = 0;
@@ -30,6 +30,7 @@ $(document).ready(function () {
             couples = couples[0].couples;
         }
         for (let couple of couples) {
+
         //if is group, do it recursively 
             if (couple.isGroup) {              
                 const isNot = checkNotOperator(couple, expression, index);
@@ -38,15 +39,13 @@ $(document).ready(function () {
                 const prevRes = buildObjectFromExpression(couple, expression, index, true);
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
                 
-                prevRes.not = isNot.not;
+                isRcv = false;
                 if (!result) {
-                    const isNot = checkNotOperator(couple, expression, index);
                     result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
                 } else {
                     result.rules.push(prevRes);
                 }
             }
-                //no Groups, just normal rules
             else {
                 if(index < objIndex.length){
                     index = isRcv ? objIndex.length + 1: objIndex.length;
