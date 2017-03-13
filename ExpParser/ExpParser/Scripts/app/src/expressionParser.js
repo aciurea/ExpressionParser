@@ -3,6 +3,7 @@
 
 $(document).ready(function () {
     let objIndex = { length: 0 };
+
     $("#btnExpressionParser").on("click", function () {
         objIndex.length = 0;
         const expression = $("#txtExpression").val();
@@ -10,7 +11,8 @@ $(document).ready(function () {
 
         $("#builder-basic").queryBuilder("setRules", result);
     });
-    var operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
+    const operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
+    
     function analyzeCondition(expression) {
         expression = expression.replace(/ /g,'');
         const couples = getCouples(expression);
@@ -27,9 +29,7 @@ $(document).ready(function () {
             couples = new Array(couples);
             couples = couples[0].couples;
         }
-
         for (let couple of couples) {
-
         //if is group, do it recursively 
             if (couple.isGroup) {              
 
@@ -70,15 +70,12 @@ $(document).ready(function () {
 
     function checkNotOperator(couple, expression, index){
         expression = expression.substring(index).toLowerCase();
-       
         const i = expression.indexOf('not');
-
         return i === 0 ? { index: 3, not:true} : {index:0, not:false};
     }
 
     function getGroupCouples(couples, lastIndexRule, isInGroup) {
         const groupedCouples = [];
-
         for(let couple of couples) {
             if (couple.ClosePIndex <= lastIndexRule && !isInGroup) {
                 //ignore the rule/couple
