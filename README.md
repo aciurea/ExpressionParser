@@ -1,4 +1,4 @@
-# ExpressionParser
+# Expression Parser
 This tool is composed from 2 parts:
 - The expression builder where you can build an expression from graphics by using a query builder.
 - The expression created can be after translated back to graphics.
