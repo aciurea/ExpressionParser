@@ -4,7 +4,7 @@ This tool is composed from 2 parts:
 - The expression created can be after translated back to graphics.
 
 There is already a tool to create expression and it can be found: http://querybuilder.js.org.
-
+![alt tag] (https://github.com/aciurea/ExpressionParser/blob/master/expression.png)
 The expressionParser support multiple operators like: 
 -  equal: =
 -  not_equal: <>
