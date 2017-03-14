@@ -1,123 +1,77 @@
 ﻿[
 
   {
-    "id": "@test",
-    "label": "Test",
+    "id": "price",
+    "label": "Price",
     "size": 30,
     "type": "integer"
   },
   {
-    "id": "@Lang",
-    "label": "Lang",
+    "id": "date",
+    "label": "Date",
+    "type": "date",
+    "size": 30
+  },
+  {
+    "id": "rate",
+    "label": "Rate",
+    "type": "double",
+    "size": 30
+  },
+  {
+    "id": "ticket",
+    "label": "Ticket",
     "type": "string",
     "size": 30
   },
   {
-    "id": "@Anid",
-    "label": "anid",
+    "id": "movie",
+    "label": "Movie",
     "type": "string",
     "size": 30
   },
   {
-    "id": "@V7",
-    "label": "V7",
+    "id": "boxOffice",
+    "label": "Box Office",
+    "type": "boolean",
+    "size": 30
+  },
+  {
+    "id": "reservationNum",
+    "label": "Reservation Number",
+    "type": "integer",
+    "size": 30
+  },
+  {
+    "id": "promotionCode",
+    "label": "Promotion Code",
+    "type": "double",
+    "size": 30
+  },
+  {
+    "id": "language",
+    "label": "Language",
     "type": "string",
     "size": 30
   },
   {
-    "id": "@Sr",
-    "label": "sr",
-    "type": "string",
-    "size": 30
+    "id": "userType",
+    "label": "User type",
+    "type": "boolean",
+    "input": "select",
+    "size": 30,
+    "values": [
+      {
+        "basic": "Basic User"
+      },
+      { "vip": "Vip" }
+    ]
   },
   {
-    "id": "@Bip",
-    "label": "vip",
+    "id": "review",
+    "label": "Review",
     "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Cip",
-    "label": "cip",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Real",
-    "label": "real",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Flag",
-    "label": "flag",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Domain",
-    "label": "Domain",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@IC",
-    "label": "IC",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@MKW",
-    "label": "MKW",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Reftype",
-    "label": "Reftype",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@SearchLang",
-    "label": "SearchLang",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@SearchTerm",
-    "label": "SearchTerm",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Country",
-    "label": "Country",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@IsWin",
-    "label": "isWin",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Version",
-    "label": "version",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Currency",
-    "label": "currency",
-    "type": "string",
-    "size": 30
-  },
-  {
-    "id": "@Gpr",
-    "label": "gpr",
-    "type": "string",
-    "size": 30
+    "size": 30,
+    "input": "textarea"
   }
 ]
