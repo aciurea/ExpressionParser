@@ -38,3 +38,5 @@ More informatin about query builder, how it can be configured and s.o it can be 
 In this repository I configured the filters for a movie reservation based on some criteria but it can be used for other purposes too!
 
 Next step will be to improve the expression builder by using proper call tails, this way we release the stack after each recurive call. Of course, there will be speed performances. 
+
+This tool has some limitations, especially if we want to use the regex match for parenthesis. Since we use the parenthesis to give the operators order, using it in regex match might cause some inconsistencies. This will be improved in time.
