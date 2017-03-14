@@ -35,4 +35,6 @@ The expression parser can literally transform any expression into graphics if th
 The expression can be manually created without the help of query builder.
 More informatin about query builder, how it can be configured and s.o it can be found at this link: http://querybuilder.js.org.
 
-In this repository I configured filters for a movie reservation based on some criteria but it can be user for other purposes!
+In this repository I configured the filters for a movie reservation based on some criteria but it can be used for other purposes too!
+
+Next step will be to improve the expression builder by using proper call tails, this way we release the stack after each recurive call. Of course, there will be speed performances. 
