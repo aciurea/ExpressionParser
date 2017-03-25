@@ -8,7 +8,7 @@ The expresion parser is using the query builder list of objects to build the exp
 ![alt tag](https://github.com/aciurea/ExpressionParser/blob/master/expression.png)
 
 
-Unlike other expression builders this tool is using paranthesis to give the order of the operator and it's using recursion only when it encounters groups of rules and is really fast.
+Unlike other expression parsers where you need to know the order of operators (e.g. AND comes before OR) and which are using only recursion to translate the expression, this expression parser is using paranthesis to guarantee the order of the operators so you don't need to worry of that and it's using recursion only when it encounters groups of rules otherwise is doing a normal iteration and is really fast.
 
 The expressionParser support multiple operators like: 
 -  equal: =
@@ -27,14 +27,13 @@ Logical Operators:
 - AND
 - NOT
 
-The priority between logical operators is given by paranthesis that are added between each group. The paranthesis are needed to grant the operators order.
 
-The expression parser can literally transform any expression into graphics if the operators that are used are the same as the ones from list above.
-Expressions can be inserted manually wihout the need of query builder.
+The expression parser can literally translate any expression into a list of objects which can be after displayed in the query builder like in the picture above.
+Expressions can be inserted directly into the textbox or it can be created wihout the need of query builder.
 
 More informatin about query builder and how it can be configured can be found at this link: http://querybuilder.js.org.
 
-In this repository I configured the filters for a movie reservation based on some criteria but it can be used for other purposes too!
+The query builder filters can be configured for any example that you might need but in this example I configured them to represent a cinema where you can make reservations based on some criteria.
 
 Next step will be to improve the expression builder by using proper call tails, this way we release the stack after each recurive call. Of course, there will be speed performances. 
 
