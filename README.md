@@ -1,14 +1,14 @@
 # Expression Parser
 This tool is composed from 2 parts:
-- The expression builder where you can build an expression from graphics by using a query builder.
+- The expression builder where you can build an expression from graphics by using the query builder tool (it can be found here http://querybuilder.js.org);
 - The expression created can be after translated back to graphics.
 
-There is already a tool called query builder and it can be found here: http://querybuilder.js.org.
+The expresion parser is using the query builder list of objects to build the expression (which can be saved somewhere on the server) and after, it can be translated back to objects and displayed.
+
 ![alt tag](https://github.com/aciurea/ExpressionParser/blob/master/expression.png)
 
-This tool is using the query builder and convert the objects into an expression wich can be saved somewhere on the server and after it can be translated back to objects and displayed in the query builder.
 
-Unlike other expression builders this tool is using paranthesis to give the order of the operator and it's using recursion only when it encounters groups of rules, therefore is very fast.
+Unlike other expression builders this tool is using paranthesis to give the order of the operator and it's using recursion only when it encounters groups of rules and is really fast.
 
 The expressionParser support multiple operators like: 
 -  equal: =
@@ -27,13 +27,12 @@ Logical Operators:
 - AND
 - NOT
 
-The priority between logical operators is given by paranthesis that are added between each group.
-Basicaly each group is surrounded by paranthesis, this way the priority of the operators is respected.
+The priority between logical operators is given by paranthesis that are added between each group. The paranthesis are needed to grant the operators order.
 
-The expression parser can literally transform any expression into graphics if the operators are like the ones from the list above and if the groups are surrounded by paranthesis.
+The expression parser can literally transform any expression into graphics if the operators that are used are the same as the ones from list above.
+Expressions can be inserted manually wihout the need of query builder.
 
-The expression can be manually created without the help of query builder.
-More informatin about query builder, how it can be configured and s.o it can be found at this link: http://querybuilder.js.org.
+More informatin about query builder and how it can be configured can be found at this link: http://querybuilder.js.org.
 
 In this repository I configured the filters for a movie reservation based on some criteria but it can be used for other purposes too!
 
