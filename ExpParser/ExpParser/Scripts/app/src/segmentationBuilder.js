@@ -1,4 +1,5 @@
 ﻿"use strict";
+const log = console.log; 
 $(document).ready(function () {
     setFilters();
     $("#btnReset").on("click", function () {
@@ -8,7 +9,7 @@ $(document).ready(function () {
 
     $("#btnParse").on("click", function () {
         const expressionData = $("#builder-basic").queryBuilder("getRules");
-        if ($.isEmptyObject(expressionData)) return;
+        if (Object.keys(expressionData).length === 0) { return undefined; }
         const parsedExpression = parseData(expressionData);
         $("#txtExpression").val(parsedExpression);
     });
@@ -113,10 +114,8 @@ function getOperatorSymbol(operator) {
         case "contains_ignore_case": return { text: "=%^", isBasic: true };
         case "regex_match": return { text: "=$%", isBasic: true };
         case "exists": return { text: "Exists", isBasic: false };
-        default:
-            console.log("Not implemented operator: " + operator);
+        default: log("Not implemented operator: " + operator); break;
     }
-
     return undefined;
 }
 
@@ -136,9 +135,7 @@ export const getOperator = (operatorSymbol) => {
         case "=^%": return { text: "contains_ignore_case", isBasic: true };
         case "=$%": return { text: "regex_match", isBasic: true };
         case "Exists": return { text: "exists", isBasic: false };
-        default:
-            console.log("Not implemented operator: " + operatorSymbol);
+        default: log("Not implemented operator: " + operatorSymbol); break;
     }
-
     return undefined;
-}
+};

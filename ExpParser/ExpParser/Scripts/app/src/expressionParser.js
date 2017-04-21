@@ -57,7 +57,7 @@ $(document).ready(function () {
                 const operator = getOperatorIndex(expression, couple.ClosePIndex);
 
                 if (!result) {
-                    result = { condition: operator.operator, not: isNot.not, rules: [] }
+                    result = { condition: operator.operator, not: isNot.not, rules: [] };
                 }
                 result.rules.push(values);
                 objIndex.length = index = couple.ClosePIndex + operator.index;
@@ -85,7 +85,7 @@ $(document).ready(function () {
                     lastIndexRule = couple.ClosePIndex;
                     const prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
                     isInGroup = false;
-                    if (groupedCouples.couples == undefined) {
+                    if (groupedCouples.couples === undefined) {
                         const prevCouples = { isGroup: true, couples: prevRes };
                         groupedCouples.push(prevCouples);
                     }
@@ -161,7 +161,7 @@ $(document).ready(function () {
             input: "text",
             type: "string",
             value: null
-        }
+        };
     }
 
     function getOperatorIndex(data, fromIndex) {
