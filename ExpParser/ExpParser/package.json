@@ -11,6 +11,17 @@
     "grunt-cli": "^1.2.0",
     "grunt-contrib-uglify": "^2.1.0",
     "grunt-karma": "^2.0.0",
-    "karma": "^1.6.0"
+    "install": "^0.8.8",
+    "jasmine": "^2.5.3",
+    "jasmine-core": "^2.5.2",
+    "karma": "^1.6.0",
+    "karma-babel-preprocessor": "^6.0.1",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-sauce-launcher": "^1.1.0",
+    "karma-script-launcher": "^1.0.0",
+    "karma-story-reporter": "^0.3.1",
+    "npm": "^4.5.0"
   }
 }

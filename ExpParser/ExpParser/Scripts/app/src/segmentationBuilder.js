@@ -10,6 +10,7 @@ $(document).ready(function () {
     $("#btnParse").on("click", function () {
         const expressionData = $("#builder-basic").queryBuilder("getRules");
         if (Object.keys(expressionData).length === 0) { return undefined; }
+        log(expressionData);
         const parsedExpression = parseData(expressionData);
         $("#txtExpression").val(parsedExpression);
     });

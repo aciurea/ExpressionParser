@@ -69,6 +69,7 @@
     <Content Include="Content\query-builder.min.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="gruntfile.js" />
+    <Content Include="karma.conf.js" />
     <Content Include="Scripts\app\src\expressionParser.js" />
     <Content Include="filters.json" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
@@ -81,6 +82,8 @@
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="package.json" />
     <Content Include="packages.config" />
+    <Content Include="Scripts\app\src\test\expressionBuilder.test.js" />
+    <Content Include="Scripts\app\src\test\testFile.js" />
     <Content Include="Scripts\libraries\bootstrap.min.js" />
     <Content Include="Scripts\libraries\jquery-3.1.1.min.js" />
     <None Include="Web.Debug.config">
