@@ -12,7 +12,7 @@
             'libraries/jquery-3.1.1.min.js',
             'libraries/bootstrap.min.js',
             'libraries/query-builder.standalone.min.js',
-            'app/src/test/*.js'
+            'app/test/dist/test.js'
         ],
 
         // list of files to exclude
@@ -42,9 +42,10 @@
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit
-        singleRun: false,
-        preprocessors: {
-            'app/src/test/testFile.js': ['babel']
-        }
+        singleRun: false
+        //,
+        //preprocessors: {
+        //    'app/test/segmentationBuilder.test.js': ['babel']
+        //}
     });
 };

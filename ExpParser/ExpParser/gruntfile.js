@@ -3,7 +3,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
         browserify: {
-            dist: {
+            application: {
                 options: {
                     transform: [["babelify", { presets: ["es2015"] }]],
                     browserifyOptions: {
@@ -11,8 +11,16 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    "Scripts/app/dist/app.js": ["Scripts/app/src/*.js"],
-                    "Scripts/test/test.js": ["Scripts/test/*.js"]
+                    "Scripts/app/dist/app.js": ["Scripts/app/src/*.js"]
+                }
+            },
+            test: {
+                options: {
+                    transform: [["babelify", { presets: ["es2015"] }]]
+
+                },
+                files: {
+                    "Scripts/app/test/dist/test.js": ["Scripts/app/test/src/*.js"]
                 }
             }
         },
@@ -41,6 +49,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-uglify");
-    grunt.registerTask("default", ["browserify"]);
-    grunt.registerTask("test", ["karma"]);
+    grunt.registerTask("default", ["browserify:application", "uglify"]);
+    grunt.registerTask("test", ["browserify:test", "karma"]);
 };

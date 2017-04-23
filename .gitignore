@@ -15,3 +15,5 @@ ExpParser.csproj.user
 ExpParser/ExpParser/Scripts/app/dist/app.js
 ExpParser/ExpParser/obj/Debug/
 ExpParser/ExpParser/Scripts/app/dist/app.js
+ExpParser/ExpParser/Scripts/app/dist/app.min.js
+ExpParser/ExpParser/Scripts/app/test/dist/test.js
