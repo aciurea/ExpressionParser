@@ -1,5 +1,5 @@
 ﻿"use strict";
-const log = console.log; 
+const log = console.log;
 $(document).ready(function () {
     setFilters();
     $("#btnReset").on("click", function () {
@@ -57,12 +57,12 @@ function createExpression(data) {
     if (data.rules && data.rules[0].condition) {
         let result = parseData(data.rules[0]);
 
-        result = data.not ? `NOT (${result})`:`(${result})`;
+        result = data.not ? `NOT (${result})` : `(${result})`;
         return result;
     }
-    let result = parseRule(data.rules[0], data.not);    
-    
-    result = data.not ? `NOT ${result}`: result;
+    let result = parseRule(data.rules[0], data.not);
+
+    result = data.not ? `NOT ${result}` : result;
     return result;
 }
 function parseData(data) {
@@ -72,7 +72,7 @@ function parseData(data) {
         for (let i = 1; i < data.rules.length; i++) {
             const arrP = [data.rules[i], result, data.condition];
 
-            result = data.rules[i].condition ?  parseRightSide(...arrP) : parseLeftSide(...arrP);
+            result = data.rules[i].condition ? parseRightSide(...arrP) : parseLeftSide(...arrP);
         }
     }
     return result;
@@ -88,7 +88,7 @@ function parseRule(rule, not) {
 
     if (operator) {
         if (operator.isBasic) {
-            if (rule.type === "integer" && isBasicOperator(rule.operator)){
+            if (rule.type === "integer" && isBasicOperator(rule.operator)) {
                 return `(${rule.id}${operator.text}${rule.value})`;
             }
             return `(${rule.id}${operator.text}"${rule.value}")`;
@@ -120,7 +120,7 @@ function getOperatorSymbol(operator) {
     return undefined;
 }
 
-export const getOperator = (operatorSymbol) => {
+function getOperator(operatorSymbol) {
     switch (operatorSymbol) {
         case "=": return { text: "equal", isBasic: true };
         case "<>": return { text: "not_equal", isBasic: true };
@@ -139,4 +139,10 @@ export const getOperator = (operatorSymbol) => {
         default: log("Not implemented operator: " + operatorSymbol); break;
     }
     return undefined;
+}
+
+export const segmentationBuilder = {
+    parseData: parseData,
+    getOperator: getOperator,
+    getOperatorSymbol: getOperatorSymbol
 };

@@ -4,3 +4,7 @@
     }
     return { add: add };
 }());
+
+export function test(x) {
+    return x;
+}
