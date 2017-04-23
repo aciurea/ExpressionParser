@@ -14,7 +14,7 @@ module.exports = function (grunt) {
                     "Scripts/app/dist/app.js": ["Scripts/app/src/*.js"]
                 }
             },
-            test: {
+            unitTest: {
                 options: {
                     transform: [["babelify", { presets: ["es2015"] }]]
 
@@ -44,11 +44,30 @@ module.exports = function (grunt) {
             unit: {
                 configFile: 'karma.conf.js'
             }
+        },
+        watch: {
+            application: {
+                files: ["Scripts/app/src/*.js"],
+                tasks: ["browserify:application", "uglify"],
+                options: {
+                    spawn: false,
+                },
+            },
+            unitTest: {
+                files: ["Scripts/app/test/src/*.js"],
+                tasks: ["browserify:unitTest", "karma"],
+                options: {
+                    spawn: false,
+                },
+            }
         }
     });
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks("grunt-browserify");
     grunt.loadNpmTasks("grunt-contrib-uglify");
+    grunt.loadNpmTasks("grunt-contrib-watch");
     grunt.registerTask("default", ["browserify:application", "uglify"]);
-    grunt.registerTask("test", ["browserify:test", "karma"]);
+    grunt.registerTask("test", ["browserify:unitTest", "karma"]);
+    grunt.registerTask("watch-test", ["watch:unitTest"]);
+    grunt.registerTask("watch-application", ["watch:application"]);
 };

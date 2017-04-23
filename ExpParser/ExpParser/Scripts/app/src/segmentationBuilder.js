@@ -7,10 +7,11 @@ $(document).ready(function () {
         $("#builder-basic").queryBuilder("reset");
     });
 
-    $("#btnParse").on("click", function () {
+    $("#btnParse").on("click", function (event) {
         const expressionData = $("#builder-basic").queryBuilder("getRules");
-        if (Object.keys(expressionData).length === 0) { return undefined; }
-        log(expressionData);
+        if (!expressionData || Object.keys(expressionData).length === 0) {
+            event.stopPropagation();
+        }
         const parsedExpression = parseData(expressionData);
         $("#txtExpression").val(parsedExpression);
     });
@@ -66,6 +67,7 @@ function createExpression(data) {
     return result;
 }
 function parseData(data) {
+    if (!data) { return undefined; }
     let result;
     result = createExpression(data);
     if (data.rules && data.rules.length > 1) {
@@ -142,7 +144,9 @@ function getOperator(operatorSymbol) {
 }
 
 export const segmentationBuilder = {
-    parseData: parseData,
-    getOperator: getOperator,
-    getOperatorSymbol: getOperatorSymbol
+    parseData,
+    getOperator,
+    getOperatorSymbol,
+    isBasicOperator,
+    options
 };

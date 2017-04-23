@@ -10,6 +10,7 @@
     "grunt-browserify": "^5.0.0",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-uglify": "^2.1.0",
+    "grunt-contrib-watch": "^1.0.0",
     "grunt-karma": "^2.0.0",
     "install": "^0.8.8",
     "jasmine": "^2.5.3",
@@ -21,6 +22,7 @@
     "karma-phantomjs-launcher": "^1.0.4",
     "karma-sauce-launcher": "^1.1.0",
     "karma-script-launcher": "^1.0.0",
+    "karma-spec-reporter": "0.0.31",
     "karma-story-reporter": "^0.3.1",
     "npm": "^4.5.0"
   }

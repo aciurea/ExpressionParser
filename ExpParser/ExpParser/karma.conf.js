@@ -1,6 +1,6 @@
 ﻿module.exports = function (config) {
     config.set({
-        plugins: ['karma-babel-preprocessor', 'karma-phantomjs-launcher', 'karma-jasmine'],
+        plugins: ['karma-babel-preprocessor', 'karma-phantomjs-launcher', 'karma-jasmine', 'karma-spec-reporter'],
         // base path, that will be used to resolve files and exclude
         basePath: '../ExpParser/Scripts/',
 
@@ -20,7 +20,16 @@
         ],
 
         // test results reporter to use
-        reporters: ['progress'],
+        reporters: ['spec'],
+        specReporter: {
+            maxLogLines: 5,             // limit number of lines logged per test
+            suppressErrorSummary: true, // do not print error summary
+            suppressFailed: false,      // do not print information about failed tests
+            suppressPassed: false,      // do not print information about passed tests
+            suppressSkipped: true,      // do not print information about skipped tests
+            showSpecTiming: false,      // print the time elapsed for each spec
+            failFast: true              // test would finish with error when a first fail occurs. 
+        },
 
         // web server port
         port: 9876,
@@ -32,7 +41,7 @@
         logLevel: config.LOG_INFO,
 
         // enable / disable watching file and executing tests whenever any file changes
-        autoWatch: true,
+        autoWatch: false,
 
         // Start these browsers
         browsers: ['PhantomJS'],
@@ -42,7 +51,7 @@
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit
-        singleRun: false
+        singleRun: true
         //,
         //preprocessors: {
         //    'app/test/segmentationBuilder.test.js': ['babel']
