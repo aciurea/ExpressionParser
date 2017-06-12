@@ -43,10 +43,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -73,6 +69,7 @@
     <Content Include="Content\query-builder.min.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="gruntfile.js" />
+    <Content Include="karma.conf.js" />
     <Content Include="Scripts\app\src\expressionParser.js" />
     <Content Include="filters.json" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
@@ -85,6 +82,8 @@
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="package.json" />
     <Content Include="packages.config" />
+    <Content Include="Scripts\app\test\src\expressionParser.test.js" />
+    <Content Include="Scripts\app\test\src\segmentationBuilder.test.js" />
     <Content Include="Scripts\libraries\bootstrap.min.js" />
     <Content Include="Scripts\libraries\jquery-3.1.1.min.js" />
     <None Include="Web.Debug.config">
@@ -105,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\app\dist\" />
+    <Folder Include="Scripts\app\test\dist\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

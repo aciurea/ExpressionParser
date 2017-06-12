@@ -1,4 +1,5 @@
 ﻿"use strict";
+const log = console.log;
 $(document).ready(function () {
     setFilters();
     $("#btnReset").on("click", function () {
@@ -6,9 +7,11 @@ $(document).ready(function () {
         $("#builder-basic").queryBuilder("reset");
     });
 
-    $("#btnParse").on("click", function () {
+    $("#btnParse").on("click", function (event) {
         const expressionData = $("#builder-basic").queryBuilder("getRules");
-        if ($.isEmptyObject(expressionData)) return;
+        if (!expressionData || Object.keys(expressionData).length === 0) {
+            event.stopPropagation();
+        }
         const parsedExpression = parseData(expressionData);
         $("#txtExpression").val(parsedExpression);
     });
@@ -55,22 +58,23 @@ function createExpression(data) {
     if (data.rules && data.rules[0].condition) {
         let result = parseData(data.rules[0]);
 
-        result = data.not ? `NOT (${result})`:`(${result})`;
+        result = data.not ? `NOT (${result})` : `(${result})`;
         return result;
     }
-    let result = parseRule(data.rules[0], data.not);    
-    
-    result = data.not ? `NOT ${result}`: result;
+    let result = parseRule(data.rules[0], data.not);
+
+    result = data.not ? `NOT ${result}` : result;
     return result;
 }
 function parseData(data) {
+    if (!data) { return undefined; }
     let result;
     result = createExpression(data);
     if (data.rules && data.rules.length > 1) {
         for (let i = 1; i < data.rules.length; i++) {
             const arrP = [data.rules[i], result, data.condition];
 
-            result = data.rules[i].condition ?  parseRightSide(...arrP) : parseLeftSide(...arrP);
+            result = data.rules[i].condition ? parseRightSide(...arrP) : parseLeftSide(...arrP);
         }
     }
     return result;
@@ -86,7 +90,7 @@ function parseRule(rule, not) {
 
     if (operator) {
         if (operator.isBasic) {
-            if (rule.type === "integer" && isBasicOperator(rule.operator)){
+            if (rule.type === "integer" && isBasicOperator(rule.operator)) {
                 return `(${rule.id}${operator.text}${rule.value})`;
             }
             return `(${rule.id}${operator.text}"${rule.value}")`;
@@ -113,14 +117,12 @@ function getOperatorSymbol(operator) {
         case "contains_ignore_case": return { text: "=%^", isBasic: true };
         case "regex_match": return { text: "=$%", isBasic: true };
         case "exists": return { text: "Exists", isBasic: false };
-        default:
-            console.log("Not implemented operator: " + operator);
+        default: log("Not implemented operator: " + operator); break;
     }
-
     return undefined;
 }
 
-export const getOperator = (operatorSymbol) => {
+function getOperator(operatorSymbol) {
     switch (operatorSymbol) {
         case "=": return { text: "equal", isBasic: true };
         case "<>": return { text: "not_equal", isBasic: true };
@@ -136,9 +138,15 @@ export const getOperator = (operatorSymbol) => {
         case "=^%": return { text: "contains_ignore_case", isBasic: true };
         case "=$%": return { text: "regex_match", isBasic: true };
         case "Exists": return { text: "exists", isBasic: false };
-        default:
-            console.log("Not implemented operator: " + operatorSymbol);
+        default: log("Not implemented operator: " + operatorSymbol); break;
     }
-
     return undefined;
 }
+
+export const segmentationBuilder = {
+    parseData,
+    getOperator,
+    getOperatorSymbol,
+    isBasicOperator,
+    options
+};
