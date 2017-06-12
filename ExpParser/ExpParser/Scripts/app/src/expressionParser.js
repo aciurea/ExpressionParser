@@ -41,11 +41,13 @@ function buildObjectFromExpression(couples, expression, index, isRcv) {
             const operator = getOperatorIndex(expression, couple.ClosePIndex);
 
             isRcv = false;
-            if (!result) {
-                result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
-            } else {
-                result.rules.push(prevRes);
-            }
+            result ? result.rules.push(prevRes)
+                : result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) }
+            //if (!result) {
+            //    ;
+            //} else {
+            //    ;
+            //}
         }
         else {
             if (index < objIndex.length) {
@@ -77,27 +79,26 @@ function getGroupCouples(couples, lastIndexRule, isInGroup) {
     const groupedCouples = [];
     for (let couple of couples) {
         if (couple.ClosePIndex <= lastIndexRule && !isInGroup) {
-            //ignore the rule/couple
+            continue;
         }
-        else {
-            if (couple.isGroup) {
-                isInGroup = true;
-                const grCouples = getCouplesFromGroup(couples, couple);
-                lastIndexRule = couple.ClosePIndex;
-                const prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
-                isInGroup = false;
-                if (groupedCouples.couples === undefined) {
-                    const prevCouples = { isGroup: true, couples: prevRes };
-                    groupedCouples.push(prevCouples);
-                }
-                else {
-                    const prevCouples = { isGroup: true, couples: prevRes };
-                    groupedCouples.push(prevCouples);
-                }
+
+        if (couple.isGroup) {
+            isInGroup = true;
+            const grCouples = getCouplesFromGroup(couples, couple);
+            lastIndexRule = couple.ClosePIndex;
+            const prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
+            isInGroup = false;
+            if (groupedCouples.couples === undefined) {
+                const prevCouples = { isGroup: true, couples: prevRes };
+                groupedCouples.push(prevCouples);
             }
             else {
-                groupedCouples.push(couple);
+                const prevCouples = { isGroup: true, couples: prevRes };
+                groupedCouples.push(prevCouples);
             }
+        }
+        else {
+            groupedCouples.push(couple);
         }
     }
     return groupedCouples;
