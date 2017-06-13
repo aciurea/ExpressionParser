@@ -82,6 +82,7 @@
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="package.json" />
     <Content Include="packages.config" />
+    <Content Include="Scripts\app\src\loadFeature.js" />
     <Content Include="Scripts\app\test\src\expressionParser.test.js" />
     <Content Include="Scripts\app\test\src\segmentationBuilder.test.js" />
     <Content Include="Scripts\libraries\bootstrap.min.js" />
