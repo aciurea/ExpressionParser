@@ -39,3 +39,4 @@ Next step will be to improve the expression builder by using proper call tails, 
 
 This tool has some limitations, especially if we want to use the regex match for parenthesis. Since we use the parenthesis to give the operators order, using it in regex match might cause some inconsistencies. This will be improved in time.
  
+ The application can identify the browser that you are using and load the proper javascript file based on support of the new features!
