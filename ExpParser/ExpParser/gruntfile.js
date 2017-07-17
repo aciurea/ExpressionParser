@@ -50,15 +50,15 @@ module.exports = function (grunt) {
                 files: ["Scripts/app/src/*.js"],
                 tasks: ["browserify:application", "uglify"],
                 options: {
-                    spawn: false,
-                },
+                    spawn: false
+                }
             },
             unitTest: {
                 files: ["Scripts/app/test/src/*.js"],
                 tasks: ["browserify:unitTest", "karma"],
                 options: {
-                    spawn: false,
-                },
+                    spawn: false
+                }
             }
         }
     });

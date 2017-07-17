@@ -1,5 +1,4 @@
-﻿[
-
+﻿const filters = [
   {
     "id": "price",
     "label": "Price",
@@ -74,4 +73,6 @@
     "size": 30,
     "input": "textarea"
   }
-]
+];
+
+export { filters };

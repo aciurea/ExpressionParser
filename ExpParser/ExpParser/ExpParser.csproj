@@ -71,7 +71,7 @@
     <Content Include="gruntfile.js" />
     <Content Include="karma.conf.js" />
     <Content Include="Scripts\app\src\expressionParser.js" />
-    <Content Include="filters.json" />
+    <Content Include="Scripts\app\src\filters.js" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
@@ -82,7 +82,6 @@
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="package.json" />
     <Content Include="packages.config" />
-    <Content Include="Scripts\app\src\loadFeature.js" />
     <Content Include="Scripts\app\test\src\expressionParser.test.js" />
     <Content Include="Scripts\app\test\src\segmentationBuilder.test.js" />
     <Content Include="Scripts\libraries\bootstrap.min.js" />

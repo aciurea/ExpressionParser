@@ -1,7 +1,9 @@
-﻿"use strict";
+﻿import { filters } from "./filters";
+
+"use strict";
 const log = console.log;
 $(document).ready(function () {
-    setFilters();
+    $("#builder-basic").queryBuilder(options);
     $("#btnReset").on("click", function () {
         $("#txtParseResult").val("");
         $("#builder-basic").queryBuilder("reset");
@@ -22,18 +24,12 @@ $(document).ready(function () {
 });
 
 //#### Query Builder Settings
-function setFilters() {
-    $.getJSON("./filters.json", function (data) {
-        options.filters = data;
-        $("#builder-basic").queryBuilder(options);
-    });
-}
 const options = {
     allow_empty: false,
     plugins: {
         "not-group": null
     },
-    filters: [],
+    filters: filters,
     operators: [
         { type: "exists", nb_inputs: 0, apply_to: ["string", "integer", "datetime", "boolean"] },
         { type: "equal" },

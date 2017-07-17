@@ -42,12 +42,7 @@ function buildObjectFromExpression(couples, expression, index, isRcv) {
 
             isRcv = false;
             result ? result.rules.push(prevRes)
-                : result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) }
-            //if (!result) {
-            //    ;
-            //} else {
-            //    ;
-            //}
+                : result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
         }
         else {
             if (index < objIndex.length) {
@@ -75,44 +70,9 @@ function checkNotOperator(couple, expression, index) {
     return i === 0 ? { index: 3, not: true } : { index: 0, not: false };
 }
 
-function getGroupCouples(couples, lastIndexRule, isInGroup) {
-    const groupedCouples = [];
-    for (let couple of couples) {
-        if (couple.ClosePIndex <= lastIndexRule && !isInGroup) {
-            continue;
-        }
 
-        if (couple.isGroup) {
-            isInGroup = true;
-            const grCouples = getCouplesFromGroup(couples, couple);
-            lastIndexRule = couple.ClosePIndex;
-            const prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
-            isInGroup = false;
-            if (groupedCouples.couples === undefined) {
-                const prevCouples = { isGroup: true, couples: prevRes };
-                groupedCouples.push(prevCouples);
-            }
-            else {
-                const prevCouples = { isGroup: true, couples: prevRes };
-                groupedCouples.push(prevCouples);
-            }
-        }
-        else {
-            groupedCouples.push(couple);
-        }
-    }
-    return groupedCouples;
-}
 
-function getCouplesFromGroup(couples, couple) {
-    const insideCouples = [];
 
-    for (let c of couples) {
-        if (c.ClosePIndex < couple.ClosePIndex && c.OpenPIndex > couple.OpenPIndex)
-            insideCouples.push(c);
-    }
-    return insideCouples;
-}
 
 function getDataFromSimpleExpression(couple, expression, index) {
     const expr = expression.toLowerCase();
@@ -178,6 +138,53 @@ function getOperatorIndex(data, fromIndex) {
     return { index: 3 + index, operator: "AND" };
 }
 
+
+
+
+
+/* ===> STRAT GROUPING THE COUPLES <=== */
+
+function getGroupCouples(couples, lastIndexRule, isInGroup) {
+    const groupedCouples = [];
+    for (let couple of couples) {
+        if (couple.ClosePIndex <= lastIndexRule && !isInGroup) {
+            continue;
+        }
+
+        if (couple.isGroup) {
+            const grCouples = getCouplesFromGroup(couples, couple);
+
+            isInGroup = true;
+            lastIndexRule = couple.ClosePIndex;
+            const prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
+            isInGroup = false;
+
+            const prevCouples = { isGroup: true, couples: prevRes };
+            groupedCouples.push(prevCouples);
+        }
+        else {
+            groupedCouples.push(couple);
+        }
+    }
+    return groupedCouples;
+}
+
+
+function getCouplesFromGroup(couples, couple) {
+    const insideCouples = [];
+
+    for (let insideCouple of couples) {
+        if (insideCouple.ClosePIndex < couple.ClosePIndex && insideCouple.OpenPIndex > couple.OpenPIndex)
+            insideCouples.push(insideCouple);
+    }
+    return insideCouples;
+}
+
+/* ===> END OF GROUPING THE COUPLES <=== */
+
+
+/* ===> GET INITIAL COUPLES <=== */
+
 function getCouples(expression) {
     expression = expression;
     let indexOfCharInCondition = -1;
@@ -215,6 +222,9 @@ function getCouples(expression) {
     }
     return dicPCouplesSource;
 }
+
+/* ===> END OF iNITIAL COUPLES <=== */
+
 
 export const expressionParser = {
     operators
