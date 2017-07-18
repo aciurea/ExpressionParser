@@ -1,6 +1,6 @@
 ﻿import { segmentationBuilder } from "./segmentationBuilder";
 "use strict";
-let objIndex = { length: 0 };
+const objIndex = { length: 0 };
 
 $(document).ready(function () {
     $("#btnExpressionParser").on("click", function () {
@@ -13,77 +13,78 @@ $(document).ready(function () {
 });
 
 const operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
+const EXISTS = "exists";
 
 function analyzeCondition(expression) {
     expression = expression.replace(/\s/g, '');
     const couples = getCouples(expression);
     const groupedCouples = getGroupCouples(couples, 0);
     let index = 0;
+    debugger;
     const result = buildObjectFromExpression(groupedCouples, expression, index, false);
 
     return result;
 }
 
-function buildObjectFromExpression(couples, expression, index, isRcv) {
+function buildObjectFromExpression(couples, expression, index) {
     let result;
     if (!(couples instanceof Array)) {
         couples = new Array(couples);
         couples = couples[0].couples;
     }
+    
     for (let couple of couples) {
 
-        //if is group, do it recursively 
+    //if is group, do it recursively 
         if (couple.isGroup) {
-            const isNot = checkNotOperator(couple, expression, index);
-            index += isNot.not ? isNot.index + 1 : 1;
+            const isNot = checkNotOperator(expression, index);
+            console.log(`first: ${objIndex.length + 1} index: ${index}`); 
+            objIndex.length += 1;
+            index += isNot.not ? isNot.index : 0;
 
-            const prevRes = buildObjectFromExpression(couple, expression, index, true);
-            const operator = getOperatorIndex(expression, couple.ClosePIndex);
+            const prevRes = buildObjectFromExpression(couple, expression, index + 1);
+            const operator = getLogicalOperator(expression, couple.ClosePIndex + 1);
 
-            isRcv = false;
-            result ? result.rules.push(prevRes)
-                : result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
+            result ? result.rules.push(prevRes) : result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
+            console.log(result);
         }
+       
         else {
             if (index < objIndex.length) {
-                index = isRcv ? objIndex.length + 1 : objIndex.length;
+                index = objIndex.length;
+            }
+            const notResult = checkNotOperator(expression, index);
+
+            index += notResult.not ? notResult.index : 0;
+
+
+            console.log(`expression is: ======>>> \n ${expression.substring(index, couple.ClosePIndex)} \n<=====`);
+
+            const operator = expression.substring(index, couple.OpenPIndex).toLowerCase();
+            const values = operator.indexOf(EXISTS) === 0 ? getExistsOpValues(couple, expression) : getNormalOpValues(couple, expression, index);
+            const operators = getLogicalOperator(expression, couple.ClosePIndex + 1);
+
+            if (result === undefined) {
+                result = { condition: operators.operator, not: notResult.not, rules: [] };
             }
 
-            const isNot = checkNotOperator(couple, expression, index);
-            index += isNot ? isNot.index : 0;
-            const values = getDataFromSimpleExpression(couple, expression, index);
-            const operator = getOperatorIndex(expression, couple.ClosePIndex);
-
-            if (!result) {
-                result = { condition: operator.operator, not: isNot.not, rules: [] };
-            }
             result.rules.push(values);
-            objIndex.length = index = couple.ClosePIndex + operator.index;
+            objIndex.length = index = couple.ClosePIndex + 1 + operators.index;
+            console.log(objIndex.length);
         }
     }
     return result;
 }
 
-function checkNotOperator(couple, expression, index) {
+function checkNotOperator(expression, index) {
     expression = expression.substring(index).toLowerCase();
-    const i = expression.indexOf('not');
-    return i === 0 ? { index: 3, not: true } : { index: 0, not: false };
+
+    return expression.indexOf('not') === 0 ? { index: 3, not: true } : { index: 0, not: false };
 }
 
-
-
-
-
-function getDataFromSimpleExpression(couple, expression, index) {
-    const expr = expression.toLowerCase();
-    const compareValue = expr.substring(index, couple.OpenPIndex);
-
-    return compareValue.indexOf("exists") === 0 ? getValuesFromExistsExp(couple, expression) :
-        getValuesFromNormalExp(couple, expression, index);
-}
 
 function getCompareSign(data, fromIndex, couple) {
-    const expression = data.slice(couple.OpenPIndex, couple.ClosePIndex);
+    const expression = data.substring(couple.OpenPIndex + 1, couple.ClosePIndex);
     let opr;
 
     operators.some(function (op) {
@@ -98,26 +99,29 @@ function getCompareSign(data, fromIndex, couple) {
     return { operator: opr, index: currentOpIndex };
 }
 
-function getValuesFromNormalExp(couple, expression, index) {
-    const res = getCompareSign(expression, index, couple);
-    const parameter = expression.substring(couple.OpenPIndex + 1, res.index);
-    const valueToCompareTo = expression.substring(res.index + res.operator.length + 1, couple.ClosePIndex - 1);
-    const op = segmentationBuilder.getOperator(res.operator);
-    const result = {
-        operator: op.text,
-        field: parameter.toLowerCase(),
-        id: parameter,
+function getNormalOpValues(couple, expression, index) {
+    const comparator = getCompareSign(expression, index, couple);
+   
+    const field = expression.substring(couple.OpenPIndex + 1, comparator.index);
+    const opStartIndex = comparator.index + comparator.operator.length + 1;
+    const value = expression.substring(opStartIndex, couple.ClosePIndex - 1);
+
+    const operators = segmentationBuilder.getOperator(comparator.operator);
+
+    return  {
+        operator: operators.text,
+        field: field.toLowerCase(),
+        id: field,
         input: "text",
         type: "string",
-        value: valueToCompareTo
+        value: value
     };
-    return result;
 }
 
-function getValuesFromExistsExp(couple, expression) {
+function getExistsOpValues(couple, expression) {
     const value = expression.substring(couple.OpenPIndex + 1, couple.ClosePIndex);
     return {
-        operator: "exists",
+        operator: EXISTS,
         field: value,
         id: value,
         input: "text",
@@ -126,16 +130,12 @@ function getValuesFromExistsExp(couple, expression) {
     };
 }
 
-function getOperatorIndex(data, fromIndex) {
-    data = data.substring(fromIndex).toLowerCase();
-    let index = data.indexOf("or");
+function getLogicalOperator(expression, fromIndex) {
+    expression = expression.substring(fromIndex).toLowerCase();
+    let index = expression.indexOf("or");
+    console.log(`in logical Operator: ${expression}`);
 
-    if (index === 0 || index === 1) {
-        return { index: 2 + index, operator: "OR" };
-    }
-    index = data.indexOf('and');
-
-    return { index: 3 + index, operator: "AND" };
+    return index === 0 ? { index: 2, operator: "OR" } : { index: 3, operator: "AND" }
 }
 
 
@@ -186,7 +186,6 @@ function getCouplesFromGroup(couples, couple) {
 /* ===> GET INITIAL COUPLES <=== */
 
 function getCouples(expression) {
-    expression = expression;
     let indexOfCharInCondition = -1;
     let indexOfLastOpenP = 0;
     let dicPCouplesSource = [];

@@ -14,6 +14,7 @@ v14/
 ExpParser.csproj.user
 ExpParser/ExpParser/Scripts/app/dist/app.js
 ExpParser/ExpParser/obj/Debug/
+ExpParser/.vs/config/applicationhost.config
 ExpParser/ExpParser/Scripts/app/dist/app.js
 ExpParser/ExpParser/Scripts/app/dist/app.min.js
 ExpParser/ExpParser/Scripts/app/test/dist/test.js
