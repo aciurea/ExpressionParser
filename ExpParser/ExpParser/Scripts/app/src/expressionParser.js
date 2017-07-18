@@ -27,7 +27,6 @@ function analyzeCondition(expression) {
 
 function buildObjectFromExpression(couples, expression, index) {
     let result;
-    let operatorIndex = 0;
     
     if (!(couples instanceof Array)) {
         couples = new Array(couples);
@@ -41,21 +40,18 @@ function buildObjectFromExpression(couples, expression, index) {
 
             index += isNot.not ? isNot.index : 0;
 
-            const prevRes = buildObjectFromExpression(couple, expression, index + 1);
+            const insideResult = buildObjectFromExpression(couple, expression, index + 1);
             const operator = getLogicalOperator(expression, couple.ClosePIndex + 1);
 
-            result ? result.rules.push(prevRes) : result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
+            result ? result.rules.push(insideResult) : result = { condition: operator.operator, not: isNot.not, rules: new Array(insideResult) };
         }
        
         else {
-            if (index < objIndex.length) {
-                index = objIndex.length;
-            }
+            index = index < objIndex.length ? objIndex.length : index;
+       
             const notResult = checkNotOperator(expression, index);
 
             index += notResult.not ? notResult.index : 0;
-
-            console.log(`expression is: ======>>> \n ${expression.substring(index, couple.ClosePIndex)} \n<=====`);
 
             const operator = expression.substring(index, couple.OpenPIndex).toLowerCase();
             const values = operator.indexOf(EXISTS) === 0 ? getExistsOpValues(couple, expression) : getNormalOpValues(couple, expression, index);
@@ -64,17 +60,15 @@ function buildObjectFromExpression(couples, expression, index) {
             if (result === undefined) {
                 result = { condition: operators.operator, not: notResult.not, rules: [] };
             }
-            operatorIndex = operators.index;
 
             result.rules.push(values);
         }
 
-        objIndex.length = index = couple.ClosePIndex + 1 + operatorIndex;
+        const operator = getLogicalOperator(expression, couple.ClosePIndex + 1);
+        objIndex.length = index = couple.ClosePIndex + 1 + operator.index;
     }
     return result;
 }
-
-
 
 
 function checkNotOperator(expression, index) {
@@ -135,7 +129,7 @@ function getLogicalOperator(expression, fromIndex) {
     expression = expression.substring(fromIndex).toLowerCase();
     const index = expression.indexOf("or");
 
-    return index === 0 ? { index: 2, operator: "OR" } : { index: 3, operator: "AND" }
+    return index === 0 ? { index: 2, operator: "OR" } : { index: 3, operator: "AND" };
 }
 
 
