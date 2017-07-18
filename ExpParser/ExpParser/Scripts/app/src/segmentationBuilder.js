@@ -6,6 +6,7 @@ $(document).ready(function () {
     $("#builder-basic").queryBuilder(options);
     $("#btnReset").on("click", function () {
         $("#txtParseResult").val("");
+        $("#txtExpression").val("");
         $("#builder-basic").queryBuilder("reset");
     });
 

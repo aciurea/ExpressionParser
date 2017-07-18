@@ -20,33 +20,31 @@ function analyzeCondition(expression) {
     const couples = getCouples(expression);
     const groupedCouples = getGroupCouples(couples, 0);
     let index = 0;
-    debugger;
-    const result = buildObjectFromExpression(groupedCouples, expression, index, false);
+    const result = buildObjectFromExpression(groupedCouples, expression, index);
 
     return result;
 }
 
 function buildObjectFromExpression(couples, expression, index) {
     let result;
+    let operatorIndex = 0;
+    
     if (!(couples instanceof Array)) {
         couples = new Array(couples);
         couples = couples[0].couples;
     }
     
     for (let couple of couples) {
-
     //if is group, do it recursively 
         if (couple.isGroup) {
             const isNot = checkNotOperator(expression, index);
-            console.log(`first: ${objIndex.length + 1} index: ${index}`); 
-            objIndex.length += 1;
+
             index += isNot.not ? isNot.index : 0;
 
             const prevRes = buildObjectFromExpression(couple, expression, index + 1);
             const operator = getLogicalOperator(expression, couple.ClosePIndex + 1);
 
             result ? result.rules.push(prevRes) : result = { condition: operator.operator, not: isNot.not, rules: new Array(prevRes) };
-            console.log(result);
         }
        
         else {
@@ -57,7 +55,6 @@ function buildObjectFromExpression(couples, expression, index) {
 
             index += notResult.not ? notResult.index : 0;
 
-
             console.log(`expression is: ======>>> \n ${expression.substring(index, couple.ClosePIndex)} \n<=====`);
 
             const operator = expression.substring(index, couple.OpenPIndex).toLowerCase();
@@ -67,14 +64,18 @@ function buildObjectFromExpression(couples, expression, index) {
             if (result === undefined) {
                 result = { condition: operators.operator, not: notResult.not, rules: [] };
             }
+            operatorIndex = operators.index;
 
             result.rules.push(values);
-            objIndex.length = index = couple.ClosePIndex + 1 + operators.index;
-            console.log(objIndex.length);
         }
+
+        objIndex.length = index = couple.ClosePIndex + 1 + operatorIndex;
     }
     return result;
 }
+
+
+
 
 function checkNotOperator(expression, index) {
     expression = expression.substring(index).toLowerCase();
@@ -132,8 +133,7 @@ function getExistsOpValues(couple, expression) {
 
 function getLogicalOperator(expression, fromIndex) {
     expression = expression.substring(fromIndex).toLowerCase();
-    let index = expression.indexOf("or");
-    console.log(`in logical Operator: ${expression}`);
+    const index = expression.indexOf("or");
 
     return index === 0 ? { index: 2, operator: "OR" } : { index: 3, operator: "AND" }
 }
@@ -159,7 +159,7 @@ function getGroupCouples(couples, lastIndexRule, isInGroup) {
             const prevRes = getGroupCouples(grCouples, lastIndexRule, isInGroup);
             isInGroup = false;
 
-            const prevCouples = { isGroup: true, couples: prevRes };
+            const prevCouples = { isGroup: true, couples: prevRes, ClosePIndex: lastIndexRule, OpenPIndex: couple.OpenPIndex };
             groupedCouples.push(prevCouples);
         }
         else {
