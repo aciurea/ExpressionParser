@@ -51,38 +51,22 @@ const options = {
 //##### End Query Builder Settings
 
 // ####### expression builder ##########
-function createExpression(data) {
-    if (data.rules && data.rules[0].condition) {
-        let result = parseData(data.rules[0]);
 
-        result = data.not ? `NOT (${result})` : `(${result})`;
-        return result;
-    }
-    let result = parseRule(data.rules[0], data.not);
-
-    result = data.not ? `NOT ${result}` : result;
-    return result;
-}
 function parseData(data) {
     if (!data) { return undefined; }
-    let result;
-    result = createExpression(data);
+
+    let result = data.rules && data.rules[0].condition ? data.not ? `NOT (${parseData(data.rules[0])})` : `(${parseData(data.rules[0])})` :
+        data.not ? `NOT ${parseRule(data.rules[0], data.not)}` : parseRule(data.rules[0], data.not);
+
     if (data.rules && data.rules.length > 1) {
         for (let i = 1; i < data.rules.length; i++) {
-            const arrP = [data.rules[i], result, data.condition];
-
-            result = data.rules[i].condition ? parseRightSide(...arrP) : parseLeftSide(...arrP);
+            result = data.rules[i].condition ? `${result} ${data.condition} (${parseData(data.rules[i])})` :`${result} ${data.condition} ${parseRule(data.rules[i])}`; 
         }
     }
     return result;
 }
-function parseRightSide(data, result, condition) {
-    return `${result} ${condition} (${parseData(data)})`;
-}
-function parseLeftSide(data, result, condition) {
-    return `${result} ${condition} ${parseRule(data)}`;
-}
-function parseRule(rule, not) {
+
+function parseRule(rule) {
     const operator = getOperatorSymbol(rule.operator);
 
     if (operator) {
@@ -96,6 +80,8 @@ function parseRule(rule, not) {
     }
     return undefined;
 }
+
+
 function isBasicOperator(operator) {
     return operator === "less" || operator === "greater" || operator === "greater_or_equal" || operator === "less_or_equal";
 }

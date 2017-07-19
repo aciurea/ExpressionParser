@@ -115,6 +115,7 @@ function getNormalOpValues(couple, expression, index) {
 
 function getExistsOpValues(couple, expression) {
     const value = expression.substring(couple.OpenPIndex + 1, couple.ClosePIndex);
+
     return {
         operator: EXISTS,
         field: value,
@@ -131,10 +132,6 @@ function getLogicalOperator(expression, fromIndex) {
 
     return index === 0 ? { index: 2, operator: "OR" } : { index: 3, operator: "AND" };
 }
-
-
-
-
 
 /* ===> STRAT GROUPING THE COUPLES <=== */
 
@@ -218,8 +215,6 @@ function getCouples(expression) {
 
 /* ===> END OF iNITIAL COUPLES <=== */
 
-
 export const expressionParser = {
     operators
 };
-
