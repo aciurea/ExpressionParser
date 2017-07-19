@@ -16,7 +16,7 @@ const operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%"
 const EXISTS = "exists";
 
 function analyzeCondition(expression) {
-    expression = expression.replace(/\s/g, '');
+    expression = expression.replace(/\s\s+/g, ' ');
     const couples = getCouples(expression);
     const groupedCouples = getGroupCouples(couples, 0);
     let index = 0;
