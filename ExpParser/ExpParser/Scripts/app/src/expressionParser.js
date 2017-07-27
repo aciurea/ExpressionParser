@@ -14,9 +14,10 @@ $(document).ready(function () {
 
 const operators = ["<>", "=$%", "<=", "=<", ">=", "=>", "=^%", "=%^", "=^", "=%", "=", "<", ">"];
 const EXISTS = "exists";
+const REGEX_OP = "=$%";
 
 function analyzeCondition(expression) {
-    expression = expression.replace(/\s\s+/g, ' ');
+    expression = expression.replace(/\s/g, '');
     const couples = getCouples(expression);
     const groupedCouples = getGroupCouples(couples, 0);
     let index = 0;
@@ -179,10 +180,22 @@ function getCouplesFromGroup(couples, couple) {
 function getCouples(expression) {
     let indexOfCharInCondition = -1;
     let indexOfLastOpenP = 0;
-    let dicPCouplesSource = [];
-    for (let c of expression) {
+    let dicPCouplesSource = []; 
+    let isRegex = identifyRegExp(expression, 0);
 
+    for (let c of expression) {
         indexOfCharInCondition++;
+
+        if (isRegex.startIndex !== -1 && indexOfCharInCondition >= isRegex.startIndex && indexOfCharInCondition < isRegex.endIndex) {
+            debugger;
+            if (indexOfCharInCondition >= isRegex.endIndex - 1) {
+                isRegex = identifyRegExp(expression, indexOfCharInCondition);
+            } else {
+                continue;
+            }
+        }
+
+
         if (c === '(') {
             indexOfLastOpenP++;
             //are multiple paranthesis open, we deal with a group
@@ -211,6 +224,15 @@ function getCouples(expression) {
         }
     }
     return dicPCouplesSource;
+}
+
+function identifyRegExp(expression, index) {
+    const startIndex = expression.indexOf(REGEX_OP, index);
+    const orIndex = startIndex !==-1 ? expression.toLowerCase().indexOf("or", index + 2):-1;
+    const andIndex = startIndex !==-1 ? expression.toLowerCase().indexOf("and", index + 3):-1;
+    const endIndex = orIndex === -1 && andIndex === -1 ? expression.length : orIndex !== -1 && orIndex < andIndex ? orIndex : andIndex;
+    
+    return { startIndex, endIndex };
 }
 
 /* ===> END OF iNITIAL COUPLES <=== */
